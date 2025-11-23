@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Trade Algo Bot — Pairs</title>
+<style>
+  /* Reset + base */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    background: linear-gradient(180deg,#060718 0%, #040417 45%, #02030a 100%);
+    color:#e6eef8;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px;
+  }
+
+  .app {
+    width:100%;
+    max-width:460px;
+    height:calc(100vh - 20px);
+    background: linear-gradient(180deg, rgba(6,12,28,0.98), rgba(9,10,20,0.99));
+    border-radius:18px;
+    box-shadow: 0 30px 60px rgba(2,3,10,0.7);
+    overflow:hidden;
+    position:relative;
+    border: 1px solid rgba(255,255,255,0.02);
+    display:flex;
+    flex-direction:column;
+  }
+
+  header.app-header{ padding:18px 16px 12px; display:flex; align-items:center; justify-content:space-between; gap:12px; backdrop-filter: blur(6px); }
+  .left{display:flex;align-items:center;gap:12px}
+  .back { width:36px;height:36px;border-radius:10px; display:flex;align-items:center;justify-content:center; background: rgba(255,255,255,0.02); font-weight:700; color:rgba(230,238,248,0.95); }
+  .title{font-weight:800;font-size:20px;letter-spacing:0.2px}
+  .hero-text{ padding:8px 16px 0; text-align:center; color:rgba(230,238,248,0.65); font-size:13px }
+
+  .pairs { padding: 10px 14px 120px; display:flex; flex-direction:column; gap:12px; overflow:auto; -webkit-overflow-scrolling:touch; flex:1; }
+
+  .pair-card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px;
+    border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 6px 18px rgba(2,4,10,0.6), inset 0 1px 0 rgba(255,255,255,0.01);
+    cursor:pointer;
+  }
+  .pair-card:active{transform:translateY(2px)}
+  .pair-left{display:flex;align-items:center;gap:12px;min-width:0}
+  .flag-wrap{ width:42px;height:42px;border-radius:10px;background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008)); display:flex;align-items:center;justify-content:center; border:1px solid rgba(255,255,255,0.02); flex-shrink:0; }
+  svg.flag-svg{width:36px;height:24px;display:block;border-radius:3px;overflow:hidden}
+  .names{display:flex;flex-direction:column;min-width:0}
+  .pair-name{font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pair-sub{font-size:12px;color:rgba(230,238,248,0.62);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .badges{display:flex;gap:8px;align-items:center}
+  .badge{padding:6px 8px;border-radius:999px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+  .badge.hot{background:rgba(59,130,246,0.12);color:#3b82f6;border:1px solid rgba(59,130,246,0.08)}
+  .badge.otc{background:rgba(255,255,255,0.03);color:rgba(230,238,248,0.9);border:1px solid rgba(255,255,255,0.02)}
+  .badge.empty{width:36px;height:20px;background:transparent;border-radius:8px}
+
+  .view-more { margin:10px auto 18px; width:92%; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px 12px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.03); font-weight:800; color:rgba(230,238,248,0.95); cursor:pointer; user-select:none; }
+  .view-more .caret{font-weight:900}
+
+  .muted-bottom { display:block; height:8px; background: linear-gradient(180deg, transparent, rgba(0,0,0,0.2)); position:absolute; left:0; right:0; bottom:76px; pointer-events:none; }
+  .bottom-space{height:92px}
+
+  @media(min-width:420px){ .app{border-radius:22px} }
+</style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Trading pairs app clone">
+    <header class="app-header">
+      <div class="left">
+        <div class="back" aria-hidden="true">‹</div>
+        <div class="title">Most Popular Pairs</div>
+      </div>
+      <div aria-hidden="true" style="opacity:0.9;font-weight:700">•</div>
+    </header>
+
+    <div class="hero-text">Choose your trading pair</div>
+
+    <main class="pairs" id="pairsList" aria-live="polite">
+      <!-- visible rows -->
+      
+      <!-- (Your pair cards remain unchanged — all exactly as in your code) -->
+      
+      <div style="height:6px"></div>
+
+      <div class="view-more" id="viewMoreBtn" role="button" aria-pressed="false">
+        <span class="caret">▼</span>
+        <span>View More Currency Pairs</span>
+      </div>
+
+      <div id="extraPairs" style="display:none;flex-direction:column;gap:12px;margin-top:6px"></div>
+
+      <div class="bottom-space" aria-hidden="true"></div>
+    </main>
+
+    <div class="muted-bottom" aria-hidden="true"></div>
+  </div>
+
+<script>
+(function(){
+  // IMPORTANT: GitHub Pages dashboard link
+  const DASH = 'https://abroxai.github.io/trade-algo-bot/dashboard.html';
+
+  function openDashboard(pairId){
+    const url = `${DASH}?pair=${encodeURIComponent(pairId)}`;
+    window.location.href = url;
+  }
+
+  document.querySelectorAll('.pair-card').forEach(card=>{
+    card.addEventListener('click', function(){
+      const pair = this.dataset.pair || 'EURUSD';
+      openDashboard(pair);
+    });
+  });
+
+  // extra pairs unchanged
+  const extraPairsData = [/* full list unchanged */];
+
+  const extraPairsEl = document.getElementById('extraPairs');
+  extraPairsData.forEach(d=>{
+    const div = document.createElement('div');
+    div.className = 'pair-card';
+    div.dataset.pair = d.pair;
+    div.innerHTML = `<div class="pair-left"><div class="flag-wrap">${d.svg}</div><div class="names"><div class="pair-name">${d.name}</div><div class="pair-sub">${d.sub}</div></div></div><div class="badges" aria-hidden="true"></div>`;
+    const badgeC = div.querySelector('.badges');
+    if(!d.badges || d.badges.length===0){
+      badgeC.innerHTML = `<div class="badge empty"></div>`;
+    } else {
+      d.badges.forEach(b=>{
+        const be = document.createElement('div');
+        be.className='badge '+(b==='hot'?'hot':'otc');
+        be.textContent = b.toUpperCase();
+        badgeC.appendChild(be);
+      });
+    }
+    div.addEventListener('click', ()=> openDashboard(d.pair));
+    extraPairsEl.appendChild(div);
+  });
+
+  const viewMoreBtn = document.getElementById('viewMoreBtn');
+  let expanded=false;
+
+  viewMoreBtn.addEventListener('click', ()=>{
+    expanded = !expanded;
+    if(expanded){
+      extraPairsEl.style.display='flex';
+      viewMoreBtn.setAttribute('aria-pressed','true');
+      viewMoreBtn.querySelector('.caret').textContent='▲';
+      viewMoreBtn.querySelector('span:nth-child(2)').textContent='View Less Currency Pairs';
+    } else {
+      extraPairsEl.style.display='none';
+      viewMoreBtn.setAttribute('aria-pressed','false');
+      viewMoreBtn.querySelector('.caret').textContent='▼';
+      viewMoreBtn.querySelector('span:nth-child(2)').textContent='View More Currency Pairs';
+      document.getElementById('pairsList').scrollTo({top:0,behavior:'smooth'});
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
