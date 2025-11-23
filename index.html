@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Trade Algo Bot — Pairs</title>
+<link rel="preconnect" href="https://flagcdn.com">
 <style>
   /* Reset + base */
   *{box-sizing:border-box;margin:0;padding:0}
@@ -25,19 +26,33 @@
     width:100%;
     max-width:460px;
     height:calc(100vh - 20px);
-    background: linear-gradient(180deg, rgba(6,12,28,0.98), rgba(9,10,20,0.99));
+    background: linear-gradient(180deg, rgba(8,12,30,0.96), rgba(12,14,24,0.98));
     border-radius:18px;
-    box-shadow: 0 30px 60px rgba(2,3,10,0.7);
+    box-shadow: 0 28px 60px rgba(2,3,10,0.72), inset 0 -6px 30px rgba(2,3,10,0.25);
     overflow:hidden;
     position:relative;
-    border: 1px solid rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.025);
     display:flex;
     flex-direction:column;
   }
 
-  header.app-header{ padding:18px 16px 8px; display:flex; align-items:center; justify-content:space-between; gap:12px; backdrop-filter: blur(6px); }
+  header.app-header{
+    padding:18px 16px 8px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    backdrop-filter: blur(6px);
+  }
   .left{display:flex;align-items:center;gap:12px}
-  .back { width:36px;height:36px;border-radius:10px; display:flex;align-items:center;justify-content:center; background: rgba(255,255,255,0.02); font-weight:700; color:rgba(230,238,248,0.95); }
+  .back {
+    width:36px;height:36px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    background: rgba(255,255,255,0.02);
+    font-weight:700;
+    color:rgba(230,238,248,0.95);
+    box-shadow: 0 6px 14px rgba(1,2,6,0.6);
+  }
   .title{font-weight:800;font-size:20px;letter-spacing:0.2px}
   .dot{opacity:0.9;font-weight:700;color:rgba(230,238,248,0.55)}
 
@@ -48,45 +63,117 @@
     align-items:center;
     justify-content:center;
     padding:6px 12px;
-    margin:8px 16px 4px;
+    margin:8px 16px 6px;
     background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
     border-radius:999px;
     width:calc(100% - 64px);
     max-width:360px;
     align-self:center;
     border:1px solid rgba(255,255,255,0.02);
+    box-shadow: 0 8px 18px rgba(3,6,20,0.35);
   }
   .pill { padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px; color:rgba(230,238,248,0.7); background:transparent; }
-  .pill.active { background: linear-gradient(90deg,#1f2240, #121224); color:#ffffff; box-shadow: 0 6px 18px rgba(2,4,10,0.45); border:1px solid rgba(255,255,255,0.02); }
+  .pill.active {
+    background: linear-gradient(90deg,#17182b,#121224);
+    color:#ffffff;
+    box-shadow: 0 6px 18px rgba(2,4,10,0.45);
+    border:1px solid rgba(255,255,255,0.02);
+  }
 
   .hero-text{ padding:6px 16px 6px; text-align:center; color:rgba(230,238,248,0.65); font-size:13px }
 
-  .pairs { padding: 10px 14px 120px; display:flex; flex-direction:column; gap:12px; overflow:auto; -webkit-overflow-scrolling:touch; flex:1; }
+  .pairs {
+    padding: 10px 14px 120px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+    flex:1;
+  }
 
   .pair-card{
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px;
-    border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 6px 18px rgba(2,4,10,0.6), inset 0 1px 0 rgba(255,255,255,0.01);
+    background: linear-gradient(180deg, rgba(11,16,30,0.65), rgba(8,12,22,0.6));
+    border-radius:14px;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    border: 1px solid rgba(255,255,255,0.03);
+    box-shadow:
+      0 6px 18px rgba(2,4,10,0.6),
+      inset 0 1px 0 rgba(255,255,255,0.02);
     cursor:pointer;
+    transition: transform .06s ease, box-shadow .06s ease;
   }
   .pair-card:active{transform:translateY(2px)}
   .pair-left{display:flex;align-items:center;gap:12px;min-width:0}
-  .flag-wrap{ width:42px;height:42px;border-radius:10px;background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008)); display:flex;align-items:center;justify-content:center; border:1px solid rgba(255,255,255,0.02); flex-shrink:0; }
-  svg.flag-svg{width:36px;height:24px;display:block;border-radius:3px;overflow:hidden}
+  .flag-wrap{
+    width:42px;height:42px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid rgba(255,255,255,0.02);
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));
+    box-shadow: 0 6px 12px rgba(2,4,10,0.45), inset 0 1px 0 rgba(255,255,255,0.015);
+    flex-shrink:0;
+  }
+  .flag { width:28px; height:20px; object-fit:cover; border-radius:3px; display:block; }
+
   .names{display:flex;flex-direction:column;min-width:0}
-  .pair-name{font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .pair-sub{font-size:12px;color:rgba(230,238,248,0.62);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pair-name{font-weight:800;font-size:15px;color:#f3f6fb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:8px}
+  .pair-sub{font-size:12px;color:rgba(230,238,248,0.62);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+
+  /* small flag on right of pair text */
+  .pair-name .mini-flag{ width:16px;height:11px;border-radius:2px; margin-left:6px; box-shadow: 0 3px 8px rgba(2,4,10,0.45); transform:translateY(1px); }
+
   .badges{display:flex;gap:8px;align-items:center}
-  .badge{padding:6px 8px;border-radius:999px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
-  .badge.hot{background:rgba(59,130,246,0.12);color:#3b82f6;border:1px solid rgba(59,130,246,0.08)}
-  .badge.otc{background:rgba(255,255,255,0.03);color:rgba(230,238,248,0.9);border:1px solid rgba(255,255,255,0.02)}
+  .badge{
+    padding:6px 8px;border-radius:999px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;
+    box-shadow: 0 8px 18px rgba(2,4,10,0.35);
+  }
+  .badge.hot{
+    background: linear-gradient(90deg,#0f291f,#07321e); color:#7ee0b3; border:1px solid rgba(126,224,179,0.06);
+    box-shadow: 0 6px 12px rgba(14,42,34,0.55), inset 0 1px 0 rgba(255,255,255,0.02);
+  }
+  .badge.otc{
+    background: linear-gradient(90deg,#312119,#3f2b19); color:#ffd98a; border:1px solid rgba(255,215,130,0.06);
+  }
   .badge.empty{width:36px;height:20px;background:transparent;border-radius:8px}
 
-  .view-more { margin:10px auto 18px; width:92%; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px 12px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.03); font-weight:800; color:rgba(230,238,248,0.95); cursor:pointer; user-select:none; }
+  .view-more {
+    margin:10px auto 18px;
+    width:92%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:10px 12px;
+    border-radius:12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.03);
+    font-weight:800;
+    color:rgba(230,238,248,0.95);
+    cursor:pointer;
+    user-select:none;
+  }
   .view-more .caret{font-weight:900}
 
-  .muted-bottom { display:block; height:8px; background: linear-gradient(180deg, transparent, rgba(0,0,0,0.2)); position:absolute; left:0; right:0; bottom:76px; pointer-events:none; }
+  .muted-bottom {
+    display:block;
+    height:8px;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.2));
+    position:absolute; left:0; right:0; bottom:76px; pointer-events:none;
+  }
   .bottom-space{height:92px}
+
+  /* small visual separator (circle icon at top) */
+  .hero-circle {
+    width:56px;height:56px;border-radius:999px;margin:0 auto 8px;
+    border:1px solid rgba(255,255,255,0.03);
+    display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+    box-shadow: 0 12px 28px rgba(2,3,10,0.45), inset 0 1px 0 rgba(255,255,255,0.02);
+  }
+  .hero-circle span{color:rgba(255,255,255,0.78);font-weight:800}
 
   @media(min-width:420px){ .app{border-radius:22px} }
 </style>
@@ -101,64 +188,88 @@
       <div class="dot" aria-hidden="true">•</div>
     </header>
 
-    <!-- EXACT small pills row: Pairs · Time · Signal (Pairs active) -->
+    <!-- pills row -->
     <div class="pills" role="tablist" aria-label="Mode selector">
       <div class="pill active" role="tab" aria-selected="true">Pairs</div>
       <div class="pill" role="tab" aria-selected="false">Time</div>
       <div class="pill" role="tab" aria-selected="false">Signal</div>
     </div>
 
-    <div class="hero-text">Choose your trading pair</div>
+    <div style="padding:12px 14px 0;text-align:center;">
+      <div class="hero-circle" aria-hidden="true"><span>$</span></div>
+      <div style="font-weight:800;color:#f3f6fb;font-size:18px;text-align:center;margin-bottom:6px">Most Popular Pairs</div>
+      <div class="hero-text">Choose your trading pair</div>
+    </div>
 
     <main class="pairs" id="pairsList" aria-live="polite">
       <!-- VISIBLE PAIRS (exact TikTok order) -->
       <div class="pair-card" data-pair="EURUSD">
         <div class="pair-left">
           <div class="flag-wrap" aria-hidden="true">
-            <!-- EU flag -->
-            <svg class="flag-svg" viewBox="0 0 36 24" xmlns="http://www.w3.org/2000/svg"><rect width="36" height="24" fill="#003399"/><g fill="#FFCC00" transform="translate(18,12) scale(0.9)"><g transform="rotate(0) translate(0,-8)"><path d="M0,0 0.6,1.9 2.5,1.9 0.9,3.1 1.5,4.9 0,3.6 -1.5,4.9 -0.9,3.1 -2.5,1.9 -0.6,1.9z"/></g></g></svg>
+            <img class="flag" src="https://flagcdn.com/w40/eu.png" alt="EU flag">
           </div>
-          <div class="names"><div class="pair-name">EUR → USD</div><div class="pair-sub">Euro — US Dollar</div></div>
+          <div class="names">
+            <div class="pair-name">EUR → USD <img class="mini-flag" src="https://flagcdn.com/w20/us.png" alt="US flag"></div>
+            <div class="pair-sub">Euro — US Dollar</div>
+          </div>
         </div>
-        <div class="badges" aria-hidden="true"><div class="badge hot">Hot</div><div class="badge otc">OTC</div></div>
+        <div class="badges" aria-hidden="true">
+          <div class="badge hot">Hot</div>
+          <div class="badge otc">OTC</div>
+        </div>
       </div>
 
       <div class="pair-card" data-pair="GBPUSD">
         <div class="pair-left">
-          <div class="flag-wrap"><svg class="flag-svg" viewBox="0 0 36 24" xmlns="http://www.w3.org/2000/svg"><rect width="36" height="24" fill="#012169"/><path d="M0 0 L36 24 M36 0 L0 24" stroke="#fff" stroke-width="3"/></svg></div>
-          <div class="names"><div class="pair-name">GBP → USD</div><div class="pair-sub">British Pound — US Dollar</div></div>
+          <div class="flag-wrap"><img class="flag" src="https://flagcdn.com/w40/gb.png" alt="UK flag"></div>
+          <div class="names">
+            <div class="pair-name">GBP → USD <img class="mini-flag" src="https://flagcdn.com/w20/us.png" alt="US flag"></div>
+            <div class="pair-sub">British Pound — US Dollar</div>
+          </div>
         </div>
         <div class="badges" aria-hidden="true"><div class="badge otc">OTC</div></div>
       </div>
 
       <div class="pair-card" data-pair="USDJPY">
         <div class="pair-left">
-          <div class="flag-wrap"><svg class="flag-svg" viewBox="0 0 36 24" xmlns="http://www.w3.org/2000/svg"><rect width="36" height="24" fill="#b22234"/><g fill="#fff"><rect y="2" width="36" height="2"></rect><rect y="6" width="36" height="2"></rect><rect y="10" width="36" height="2"></rect></g></svg></div>
-          <div class="names"><div class="pair-name">USD → JPY</div><div class="pair-sub">US Dollar — Japanese Yen</div></div>
+          <div class="flag-wrap"><img class="flag" src="https://flagcdn.com/w40/us.png" alt="US flag"></div>
+          <div class="names">
+            <div class="pair-name">USD → JPY <img class="mini-flag" src="https://flagcdn.com/w20/jp.png" alt="JP flag"></div>
+            <div class="pair-sub">US Dollar — Japanese Yen</div>
+          </div>
         </div>
         <div class="badges" aria-hidden="true"><div class="badge empty"></div></div>
       </div>
 
       <div class="pair-card" data-pair="EURGBP">
         <div class="pair-left">
-          <div class="flag-wrap"><svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#003399"/></svg></div>
-          <div class="names"><div class="pair-name">EUR → GBP</div><div class="pair-sub">Euro — British Pound</div></div>
+          <div class="flag-wrap"><img class="flag" src="https://flagcdn.com/w40/eu.png" alt="EU flag"></div>
+          <div class="names">
+            <div class="pair-name">EUR → GBP <img class="mini-flag" src="https://flagcdn.com/w20/gb.png" alt="UK flag"></div>
+            <div class="pair-sub">Euro — British Pound</div>
+          </div>
         </div>
         <div class="badges" aria-hidden="true"><div class="badge hot">Hot</div></div>
       </div>
 
       <div class="pair-card" data-pair="AUDUSD">
         <div class="pair-left">
-          <div class="flag-wrap"><svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#00247d"/></svg></div>
-          <div class="names"><div class="pair-name">AUD → USD</div><div class="pair-sub">Australian Dollar — US Dollar</div></div>
+          <div class="flag-wrap"><img class="flag" src="https://flagcdn.com/w40/au.png" alt="AU flag"></div>
+          <div class="names">
+            <div class="pair-name">AUD → USD <img class="mini-flag" src="https://flagcdn.com/w20/us.png" alt="US flag"></div>
+            <div class="pair-sub">Australian Dollar — US Dollar</div>
+          </div>
         </div>
         <div class="badges" aria-hidden="true"><div class="badge hot">Hot</div><div class="badge otc">OTC</div></div>
       </div>
 
       <div class="pair-card" data-pair="USDCHF">
         <div class="pair-left">
-          <div class="flag-wrap"><svg class="flag-svg" viewBox="0 0 36 36"><rect width="36" height="36" fill="#d52b1e"/><g fill="#fff"><rect x="14" y="6" width="8" height="24"/><rect x="6" y="14" width="24" height="8"/></g></svg></div>
-          <div class="names"><div class="pair-name">USD → CHF</div><div class="pair-sub">US Dollar — Swiss Franc</div></div>
+          <div class="flag-wrap"><img class="flag" src="https://flagcdn.com/w40/ch.png" alt="CH flag"></div>
+          <div class="names">
+            <div class="pair-name">USD → CHF <img class="mini-flag" src="https://flagcdn.com/w20/ch.png" alt="CH flag"></div>
+            <div class="pair-sub">US Dollar — Swiss Franc</div>
+          </div>
         </div>
         <div class="badges" aria-hidden="true"><div class="badge hot">Hot</div><div class="badge otc">OTC</div></div>
       </div>
@@ -181,8 +292,8 @@
 
 <script>
 (function(){
-  // Absolute path to dashboard on your GitHub Pages
-  const DASH = 'https://abroxai.github.io/trade-algo-bot/dashboard.html';
+  // dashboard path on your GitHub Pages (adjust username if needed)
+  const DASH = 'https://AbroxAI.github.io/trade-algo-bot/dashboard.html';
 
   function openDashboard(pairId){
     const url = `${DASH}?pair=${encodeURIComponent(pairId)}`;
@@ -197,18 +308,18 @@
     });
   });
 
-  // Extra pairs data (non-empty list)
+  // Extra pairs (non-empty list so "View More" never shows empty)
   const extraPairsData = [
-    {pair:'EURJPY', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#003399"/></svg>', name:'EUR → JPY', sub:'Euro — Japanese Yen', badges:['hot']},
-    {pair:'GBPJPY', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#012169"/></svg>', name:'GBP → JPY', sub:'British Pound — Japanese Yen', badges:[]},
-    {pair:'EURAUD', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#003399"/></svg>', name:'EUR → AUD', sub:'Euro — Australian Dollar', badges:[]},
-    {pair:'USDCAD', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#d52b1e"/><rect x="10" width="16" height="24" fill="#fff"/></svg>', name:'USD → CAD', sub:'US Dollar — Canadian Dollar', badges:[]},
-    {pair:'GBPEUR', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#012169"/></svg>', name:'GBP → EUR', sub:'British Pound — Euro', badges:[]},
-    {pair:'USDMXN', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#006847"/></svg>', name:'USD → MXN', sub:'US Dollar — Mexican Peso', badges:[]},
-    {pair:'EURCHF', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#003399"/></svg>', name:'EUR → CHF', sub:'Euro — Swiss Franc', badges:['otc']},
-    {pair:'USDNOK', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#00205b"/></svg>', name:'USD → NOK', sub:'US Dollar — Norwegian Krone', badges:[]},
-    {pair:'NZDUSD', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#00247d"/></svg>', name:'NZD → USD', sub:'New Zealand Dollar — US Dollar', badges:[]},
-    {pair:'AUDJPY', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#00247d"/></svg>', name:'AUD → JPY', sub:'Australian Dollar — Japanese Yen', badges:[]}
+    {pair:'EURJPY', flag:'eu', mini:'jp', name:'EUR → JPY', sub:'Euro — Japanese Yen', badges:['hot']},
+    {pair:'GBPJPY', flag:'gb', mini:'jp', name:'GBP → JPY', sub:'British Pound — Japanese Yen', badges:[]},
+    {pair:'EURAUD', flag:'eu', mini:'au', name:'EUR → AUD', sub:'Euro — Australian Dollar', badges:[]},
+    {pair:'USDCAD', flag:'us', mini:'ca', name:'USD → CAD', sub:'US Dollar — Canadian Dollar', badges:[]},
+    {pair:'GBPEUR', flag:'gb', mini:'eu', name:'GBP → EUR', sub:'British Pound — Euro', badges:[]},
+    {pair:'USDMXN', flag:'us', mini:'mx', name:'USD → MXN', sub:'US Dollar — Mexican Peso', badges:[]},
+    {pair:'EURCHF', flag:'eu', mini:'ch', name:'EUR → CHF', sub:'Euro — Swiss Franc', badges:['otc']},
+    {pair:'USDNOK', flag:'us', mini:'no', name:'USD → NOK', sub:'US Dollar — Norwegian Krone', badges:[]},
+    {pair:'NZDUSD', flag:'nz', mini:'us', name:'NZD → USD', sub:'New Zealand Dollar — US Dollar', badges:[]},
+    {pair:'AUDJPY', flag:'au', mini:'jp', name:'AUD → JPY', sub:'Australian Dollar — Japanese Yen', badges:[]}
   ];
 
   const extraPairsEl = document.getElementById('extraPairs');
@@ -216,7 +327,16 @@
     const div = document.createElement('div');
     div.className = 'pair-card';
     div.dataset.pair = d.pair;
-    div.innerHTML = `<div class="pair-left"><div class="flag-wrap">${d.svg}</div><div class="names"><div class="pair-name">${d.name}</div><div class="pair-sub">${d.sub}</div></div></div><div class="badges" aria-hidden="true"></div>`;
+    div.innerHTML = `
+      <div class="pair-left">
+        <div class="flag-wrap"><img class="flag" src="https://flagcdn.com/w40/${d.flag}.png" alt="${d.flag}"></div>
+        <div class="names">
+          <div class="pair-name">${d.name} <img class="mini-flag" src="https://flagcdn.com/w20/${d.mini}.png" alt="${d.mini}"></div>
+          <div class="pair-sub">${d.sub}</div>
+        </div>
+      </div>
+      <div class="badges" aria-hidden="true"></div>
+    `;
     const badgeC = div.querySelector('.badges');
     if(!d.badges || d.badges.length===0){
       badgeC.innerHTML = `<div class="badge empty"></div>`;
@@ -232,10 +352,9 @@
     extraPairsEl.appendChild(div);
   });
 
-  // Expand/collapse behaviour
+  // Expand/collapse
   const viewMoreBtn = document.getElementById('viewMoreBtn');
   let expanded=false;
-
   viewMoreBtn.addEventListener('click', ()=>{
     expanded = !expanded;
     if(expanded){
@@ -252,7 +371,7 @@
     }
   });
 
-  // store scroll position (app-like)
+  // Preserve scroll position
   const pairsEl = document.getElementById('pairsList');
   const key = 'tradealgo_pairs_scroll';
   pairsEl.addEventListener('scroll', ()=> localStorage.setItem(key, pairsEl.scrollTop));
