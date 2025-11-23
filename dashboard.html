@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Trade Algo Bot — Signal</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(180deg,#060718 0%, #040417 45%, #02030a 100%);
+    color:#e6eef8;
+    min-height:100vh;
+    display:flex;align-items:center;justify-content:center;padding:10px;
+  }
+
+  .app{ width:100%; max-width:420px; background: linear-gradient(180deg, rgba(6,12,28,0.98), rgba(9,10,20,0.99)); border-radius:18px; box-shadow:0 30px 60px rgba(2,3,10,0.7); padding:18px; border:1px solid rgba(255,255,255,0.02); }
+
+  .heading { text-align:center; font-weight:700; font-size:16px; margin-bottom:10px; color:#fff;}
+  .subtext{ text-align:center;color:rgba(230,238,248,0.65); font-size:12px; margin-bottom:14px; }
+
+  .card { background:#0a0d1d; border-radius:16px; border:1px solid #1a1f35; padding:16px; text-align:center; }
+
+  .pair-title{ font-weight:800; font-size:16px; margin-bottom:6px; }
+  .pair-meta{ font-size:12px; color:#7a86a8; margin-bottom:12px; }
+
+  /* progress ring */
+  .ring { width:120px;height:120px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center; position:relative; }
+  .ring .percent{ font-weight:800; font-size:20px; color:#b06bff; z-index:2; }
+  .ring svg{ position:absolute; left:0; top:0; transform:rotate(-90deg); }
+
+  .indicators{ display:flex; gap:10px; justify-content:center; margin-top:14px; margin-bottom:16px; }
+  .ind-chip{ padding:8px 12px; border-radius:12px; background:#0a0d1d; border:1px solid #1a1f35; color:#fff; font-weight:700; font-size:12px; }
+
+  .btn-primary{ width:100%; padding:14px; border-radius:14px; border:none; font-weight:800; font-size:15px; color:#fff; cursor:pointer; background:linear-gradient(90deg,#5f2bff,#9a4dff); margin-bottom:12px; }
+  .btn-ghost{ width:100%; padding:14px; border-radius:14px; border:1px solid #1a1f35; font-weight:700; font-size:15px; color:#7a86a8; background:transparent; cursor:pointer; }
+
+  .powered{ text-align:center; font-size:11px; color:#5b6280; margin-top:10px; }
+
+  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter: blur(4px); justify-content:center; align-items:center; z-index:9999; }
+  .modal .box{ background:#0b0f1e; color:#fff; padding:22px; border-radius:16px; width:92%; max-width:380px; border:1px solid #1f263b; text-align:center; }
+  .modal h3{ font-size:20px; margin-bottom:8px; }
+  .modal p{ color:#9aa4bd; font-size:14px; margin-bottom:14px; line-height:1.45; }
+  .modal .actions{ display:flex; gap:10px; justify-content:center; margin-top:8px; }
+  .modal .actions a, .modal .actions button{ flex:1; padding:12px 10px; border-radius:12px; text-decoration:none; border:none; font-weight:800; cursor:pointer; }
+  .modal .actions .tg{ background:linear-gradient(90deg,#5f2bff,#9a4dff); color:#fff; }
+  .modal .actions .check{ background:#0a0f15; color:#9ff0c7; border:1px solid rgba(255,255,255,0.03); }
+</style>
+</head>
+<body>
+  <div class="app" role="application">
+    <div class="heading">Advanced Trading Signals</div>
+    <div class="subtext">Pairs · Time · Signal</div>
+
+    <div class="card">
+      <div class="pair-title" id="pairTitle">EUR / USD (OTC)</div>
+      <div class="pair-meta" id="pairMeta">Live Signal · 5s Frame</div>
+
+      <div class="ring" aria-hidden="true">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" stroke="#22263b" stroke-width="8" fill="none"></circle>
+          <circle id="progressCircle" cx="60" cy="60" r="52" stroke="#b06bff" stroke-width="8" stroke-linecap="round" fill="none" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
+        </svg>
+        <div class="percent" id="percentText">0%</div>
+      </div>
+
+      <div style="margin-top:12px;color:#8a94ad;font-size:13px">Analyzing signal…</div>
+      <div style="margin-top:4px;color:#58607a;font-size:12px">Processing market data</div>
+
+      <div class="indicators">
+        <div class="ind-chip">Parabolic SAR</div>
+        <div class="ind-chip">On Balance Volume</div>
+      </div>
+
+      <button class="btn-primary" id="generateBtn">⚡ Generate New Signal</button>
+      <button class="btn-ghost" id="backBtn">← Back to Pairs</button>
+
+      <div class="powered">Powered by Advanced AI</div>
+    </div>
+  </div>
+
+  <div class="modal" id="subModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="box">
+      <h3>Subscription Required</h3>
+      <p>
+        To generate live AI trading signals you must activate a subscription through our official Telegram bot. Subscribing gives you instant verified access to real-time signals, push notifications, and automated trade execution options.
+      </p>
+
+      <div class="actions">
+        <a class="tg" id="tgLink" href="https://t.me/Trade_Algo_Robot?start=tradealgo_sub" target="_blank" rel="noopener noreferrer">Open Telegram Bot</a>
+        <button class="check" id="iSubscribedBtn">I Subscribed</button>
+      </div>
+
+      <div style="margin-top:12px;color:#7a86a8;font-size:12px">After subscribing, click "I Subscribed" to unlock signals (manual verify demo).</div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  function qs(name){ const u = new URLSearchParams(location.search); return u.get(name); }
+  const pair = qs('pair') || 'EURUSD';
+  const map = {
+    EURUSD:'EUR / USD (OTC)',
+    GBPUSD:'GBP / USD (OTC)',
+    USDJPY:'USD / JPY (OTC)',
+    EURGBP:'EUR / GBP (OTC)',
+    AUDUSD:'AUD / USD (OTC)',
+    USDCHF:'USD / CHF (OTC)',
+    NZDUSD:'NZD / USD (OTC)',
+    USDCAD:'USD / CAD (OTC)'
+  };
+  document.getElementById('pairTitle').textContent = map[pair] || (pair.replace(/([A-Z]{3})([A-Z]{3})/,'$1 / $2') + ' (OTC)');
+})();
+
+/* progress animation */
+(function(){
+  const circle = document.getElementById('progressCircle');
+  const percentText = document.getElementById('percentText');
+  const radius = 52;
+  const circ = 2 * Math.PI * radius;
+  circle.style.strokeDasharray = `${circ}`;
+  let pct = 0;
+
+  const interval = setInterval(()=>{
+    if(pct >= 73){ clearInterval(interval); return; }
+    pct += Math.floor(Math.random()*6)+2;
+    if(pct > 73) pct = 73;
+    const off = circ * (1 - pct/100);
+    circle.style.transition = 'stroke-dashoffset 0.35s ease';
+    circle.style.strokeDashoffset = off;
+    percentText.textContent = pct + '%';
+  }, 400);
+
+  setTimeout(()=>{ percentText.textContent = '73%'; circle.style.strokeDashoffset = circ * (1 - 73/100); }, 4100);
+})();
+
+/* FIXED: GitHub Pages path */
+document.getElementById('backBtn').addEventListener('click', ()=> {
+  window.location.href = 'https://abroxai.github.io/trade-algo-bot/index.html';
+});
+
+const generateBtn = document.getElementById('generateBtn');
+const subModal = document.getElementById('subModal');
+const iSubBtn = document.getElementById('iSubscribedBtn');
+
+generateBtn.addEventListener('click', ()=> {
+  const subscribed = localStorage.getItem('tradealgo_subscribed') === '1';
+  if(subscribed){
+    generateBtn.textContent = 'Generating...';
+    generateBtn.disabled = true;
+    setTimeout(()=>{
+      generateBtn.textContent = '⚡ Generate New Signal';
+      generateBtn.disabled=false;
+      alert('Signal generated: BUY 0.5 lot on ' + document.getElementById('pairTitle').textContent);
+    }, 1400);
+  } else {
+    subModal.style.display = 'flex';
+    subModal.setAttribute('aria-hidden','false');
+  }
+});
+
+iSubBtn.addEventListener('click', ()=> {
+  localStorage.setItem('tradealgo_subscribed','1');
+  subModal.style.display = 'none';
+  subModal.setAttribute('aria-hidden','true');
+  alert('Subscription acknowledged. You can now Generate New Signal.');
+});
+
+subModal.addEventListener('click', (e)=>{
+  if(e.target === subModal){
+    subModal.style.display = 'none';
+    subModal.setAttribute('aria-hidden','true');
+  }
+});
+</script>
+</body>
+</html>
