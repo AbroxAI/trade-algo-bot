@@ -35,11 +35,31 @@
     flex-direction:column;
   }
 
-  header.app-header{ padding:18px 16px 12px; display:flex; align-items:center; justify-content:space-between; gap:12px; backdrop-filter: blur(6px); }
+  header.app-header{ padding:18px 16px 8px; display:flex; align-items:center; justify-content:space-between; gap:12px; backdrop-filter: blur(6px); }
   .left{display:flex;align-items:center;gap:12px}
   .back { width:36px;height:36px;border-radius:10px; display:flex;align-items:center;justify-content:center; background: rgba(255,255,255,0.02); font-weight:700; color:rgba(230,238,248,0.95); }
   .title{font-weight:800;font-size:20px;letter-spacing:0.2px}
-  .hero-text{ padding:8px 16px 0; text-align:center; color:rgba(230,238,248,0.65); font-size:13px }
+  .dot{opacity:0.9;font-weight:700;color:rgba(230,238,248,0.55)}
+
+  /* small pills row (Pairs · Time · Signal) */
+  .pills {
+    display:flex;
+    gap:8px;
+    align-items:center;
+    justify-content:center;
+    padding:6px 12px;
+    margin:8px 16px 4px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+    border-radius:999px;
+    width:calc(100% - 64px);
+    max-width:360px;
+    align-self:center;
+    border:1px solid rgba(255,255,255,0.02);
+  }
+  .pill { padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px; color:rgba(230,238,248,0.7); background:transparent; }
+  .pill.active { background: linear-gradient(90deg,#1f2240, #121224); color:#ffffff; box-shadow: 0 6px 18px rgba(2,4,10,0.45); border:1px solid rgba(255,255,255,0.02); }
+
+  .hero-text{ padding:6px 16px 6px; text-align:center; color:rgba(230,238,248,0.65); font-size:13px }
 
   .pairs { padding: 10px 14px 120px; display:flex; flex-direction:column; gap:12px; overflow:auto; -webkit-overflow-scrolling:touch; flex:1; }
 
@@ -78,8 +98,15 @@
         <div class="back" aria-hidden="true">‹</div>
         <div class="title">Most Popular Pairs</div>
       </div>
-      <div aria-hidden="true" style="opacity:0.9;font-weight:700">•</div>
+      <div class="dot" aria-hidden="true">•</div>
     </header>
+
+    <!-- EXACT small pills row: Pairs · Time · Signal (Pairs active) -->
+    <div class="pills" role="tablist" aria-label="Mode selector">
+      <div class="pill active" role="tab" aria-selected="true">Pairs</div>
+      <div class="pill" role="tab" aria-selected="false">Time</div>
+      <div class="pill" role="tab" aria-selected="false">Signal</div>
+    </div>
 
     <div class="hero-text">Choose your trading pair</div>
 
@@ -144,9 +171,7 @@
       </div>
 
       <!-- EXTRA PAIRS (hidden until expanded) -->
-      <div id="extraPairs" style="display:none;flex-direction:column;gap:12px;margin-top:6px">
-        <!-- will be populated by JS -->
-      </div>
+      <div id="extraPairs" style="display:none;flex-direction:column;gap:12px;margin-top:6px"></div>
 
       <div class="bottom-space" aria-hidden="true"></div>
     </main>
@@ -175,7 +200,7 @@
   // Extra pairs data (non-empty list)
   const extraPairsData = [
     {pair:'EURJPY', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#003399"/></svg>', name:'EUR → JPY', sub:'Euro — Japanese Yen', badges:['hot']},
-    {pair:'GBPJpy', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#012169"/></svg>', name:'GBP → JPY', sub:'British Pound — Japanese Yen', badges:[]},
+    {pair:'GBPJPY', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#012169"/></svg>', name:'GBP → JPY', sub:'British Pound — Japanese Yen', badges:[]},
     {pair:'EURAUD', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#003399"/></svg>', name:'EUR → AUD', sub:'Euro — Australian Dollar', badges:[]},
     {pair:'USDCAD', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#d52b1e"/><rect x="10" width="16" height="24" fill="#fff"/></svg>', name:'USD → CAD', sub:'US Dollar — Canadian Dollar', badges:[]},
     {pair:'GBPEUR', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#012169"/></svg>', name:'GBP → EUR', sub:'British Pound — Euro', badges:[]},
