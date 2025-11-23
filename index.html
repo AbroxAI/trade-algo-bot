@@ -84,10 +84,58 @@
     <div class="hero-text">Choose your trading pair</div>
 
     <main class="pairs" id="pairsList" aria-live="polite">
-      <!-- visible rows -->
-      
-      <!-- (Your pair cards remain unchanged — all exactly as in your code) -->
-      
+      <!-- VISIBLE PAIRS (exact TikTok order) -->
+      <div class="pair-card" data-pair="EURUSD">
+        <div class="pair-left">
+          <div class="flag-wrap" aria-hidden="true">
+            <!-- EU flag -->
+            <svg class="flag-svg" viewBox="0 0 36 24" xmlns="http://www.w3.org/2000/svg"><rect width="36" height="24" fill="#003399"/><g fill="#FFCC00" transform="translate(18,12) scale(0.9)"><g transform="rotate(0) translate(0,-8)"><path d="M0,0 0.6,1.9 2.5,1.9 0.9,3.1 1.5,4.9 0,3.6 -1.5,4.9 -0.9,3.1 -2.5,1.9 -0.6,1.9z"/></g></g></svg>
+          </div>
+          <div class="names"><div class="pair-name">EUR → USD</div><div class="pair-sub">Euro — US Dollar</div></div>
+        </div>
+        <div class="badges" aria-hidden="true"><div class="badge hot">Hot</div><div class="badge otc">OTC</div></div>
+      </div>
+
+      <div class="pair-card" data-pair="GBPUSD">
+        <div class="pair-left">
+          <div class="flag-wrap"><svg class="flag-svg" viewBox="0 0 36 24" xmlns="http://www.w3.org/2000/svg"><rect width="36" height="24" fill="#012169"/><path d="M0 0 L36 24 M36 0 L0 24" stroke="#fff" stroke-width="3"/></svg></div>
+          <div class="names"><div class="pair-name">GBP → USD</div><div class="pair-sub">British Pound — US Dollar</div></div>
+        </div>
+        <div class="badges" aria-hidden="true"><div class="badge otc">OTC</div></div>
+      </div>
+
+      <div class="pair-card" data-pair="USDJPY">
+        <div class="pair-left">
+          <div class="flag-wrap"><svg class="flag-svg" viewBox="0 0 36 24" xmlns="http://www.w3.org/2000/svg"><rect width="36" height="24" fill="#b22234"/><g fill="#fff"><rect y="2" width="36" height="2"></rect><rect y="6" width="36" height="2"></rect><rect y="10" width="36" height="2"></rect></g></svg></div>
+          <div class="names"><div class="pair-name">USD → JPY</div><div class="pair-sub">US Dollar — Japanese Yen</div></div>
+        </div>
+        <div class="badges" aria-hidden="true"><div class="badge empty"></div></div>
+      </div>
+
+      <div class="pair-card" data-pair="EURGBP">
+        <div class="pair-left">
+          <div class="flag-wrap"><svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#003399"/></svg></div>
+          <div class="names"><div class="pair-name">EUR → GBP</div><div class="pair-sub">Euro — British Pound</div></div>
+        </div>
+        <div class="badges" aria-hidden="true"><div class="badge hot">Hot</div></div>
+      </div>
+
+      <div class="pair-card" data-pair="AUDUSD">
+        <div class="pair-left">
+          <div class="flag-wrap"><svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#00247d"/></svg></div>
+          <div class="names"><div class="pair-name">AUD → USD</div><div class="pair-sub">Australian Dollar — US Dollar</div></div>
+        </div>
+        <div class="badges" aria-hidden="true"><div class="badge hot">Hot</div><div class="badge otc">OTC</div></div>
+      </div>
+
+      <div class="pair-card" data-pair="USDCHF">
+        <div class="pair-left">
+          <div class="flag-wrap"><svg class="flag-svg" viewBox="0 0 36 36"><rect width="36" height="36" fill="#d52b1e"/><g fill="#fff"><rect x="14" y="6" width="8" height="24"/><rect x="6" y="14" width="24" height="8"/></g></svg></div>
+          <div class="names"><div class="pair-name">USD → CHF</div><div class="pair-sub">US Dollar — Swiss Franc</div></div>
+        </div>
+        <div class="badges" aria-hidden="true"><div class="badge hot">Hot</div><div class="badge otc">OTC</div></div>
+      </div>
+
       <div style="height:6px"></div>
 
       <div class="view-more" id="viewMoreBtn" role="button" aria-pressed="false">
@@ -95,7 +143,10 @@
         <span>View More Currency Pairs</span>
       </div>
 
-      <div id="extraPairs" style="display:none;flex-direction:column;gap:12px;margin-top:6px"></div>
+      <!-- EXTRA PAIRS (hidden until expanded) -->
+      <div id="extraPairs" style="display:none;flex-direction:column;gap:12px;margin-top:6px">
+        <!-- will be populated by JS -->
+      </div>
 
       <div class="bottom-space" aria-hidden="true"></div>
     </main>
@@ -105,7 +156,7 @@
 
 <script>
 (function(){
-  // IMPORTANT: GitHub Pages dashboard link
+  // Absolute path to dashboard on your GitHub Pages
   const DASH = 'https://abroxai.github.io/trade-algo-bot/dashboard.html';
 
   function openDashboard(pairId){
@@ -113,6 +164,7 @@
     window.location.href = url;
   }
 
+  // Wire visible initial cards
   document.querySelectorAll('.pair-card').forEach(card=>{
     card.addEventListener('click', function(){
       const pair = this.dataset.pair || 'EURUSD';
@@ -120,8 +172,19 @@
     });
   });
 
-  // extra pairs unchanged
-  const extraPairsData = [/* full list unchanged */];
+  // Extra pairs data (non-empty list)
+  const extraPairsData = [
+    {pair:'EURJPY', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#003399"/></svg>', name:'EUR → JPY', sub:'Euro — Japanese Yen', badges:['hot']},
+    {pair:'GBPJpy', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#012169"/></svg>', name:'GBP → JPY', sub:'British Pound — Japanese Yen', badges:[]},
+    {pair:'EURAUD', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#003399"/></svg>', name:'EUR → AUD', sub:'Euro — Australian Dollar', badges:[]},
+    {pair:'USDCAD', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#d52b1e"/><rect x="10" width="16" height="24" fill="#fff"/></svg>', name:'USD → CAD', sub:'US Dollar — Canadian Dollar', badges:[]},
+    {pair:'GBPEUR', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#012169"/></svg>', name:'GBP → EUR', sub:'British Pound — Euro', badges:[]},
+    {pair:'USDMXN', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#006847"/></svg>', name:'USD → MXN', sub:'US Dollar — Mexican Peso', badges:[]},
+    {pair:'EURCHF', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#003399"/></svg>', name:'EUR → CHF', sub:'Euro — Swiss Franc', badges:['otc']},
+    {pair:'USDNOK', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#00205b"/></svg>', name:'USD → NOK', sub:'US Dollar — Norwegian Krone', badges:[]},
+    {pair:'NZDUSD', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#00247d"/></svg>', name:'NZD → USD', sub:'New Zealand Dollar — US Dollar', badges:[]},
+    {pair:'AUDJPY', svg:'<svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="24" fill="#00247d"/></svg>', name:'AUD → JPY', sub:'Australian Dollar — Japanese Yen', badges:[]}
+  ];
 
   const extraPairsEl = document.getElementById('extraPairs');
   extraPairsData.forEach(d=>{
@@ -135,7 +198,7 @@
     } else {
       d.badges.forEach(b=>{
         const be = document.createElement('div');
-        be.className='badge '+(b==='hot'?'hot':'otc');
+        be.className = 'badge '+(b==='hot'?'hot':'otc');
         be.textContent = b.toUpperCase();
         badgeC.appendChild(be);
       });
@@ -144,24 +207,31 @@
     extraPairsEl.appendChild(div);
   });
 
+  // Expand/collapse behaviour
   const viewMoreBtn = document.getElementById('viewMoreBtn');
   let expanded=false;
 
   viewMoreBtn.addEventListener('click', ()=>{
     expanded = !expanded;
     if(expanded){
-      extraPairsEl.style.display='flex';
+      extraPairsEl.style.display = 'flex';
       viewMoreBtn.setAttribute('aria-pressed','true');
-      viewMoreBtn.querySelector('.caret').textContent='▲';
-      viewMoreBtn.querySelector('span:nth-child(2)').textContent='View Less Currency Pairs';
+      viewMoreBtn.querySelector('.caret').textContent = '▲';
+      viewMoreBtn.querySelector('span:nth-child(2)').textContent = 'View Less Currency Pairs';
     } else {
-      extraPairsEl.style.display='none';
+      extraPairsEl.style.display = 'none';
       viewMoreBtn.setAttribute('aria-pressed','false');
-      viewMoreBtn.querySelector('.caret').textContent='▼';
-      viewMoreBtn.querySelector('span:nth-child(2)').textContent='View More Currency Pairs';
-      document.getElementById('pairsList').scrollTo({top:0,behavior:'smooth'});
+      viewMoreBtn.querySelector('.caret').textContent = '▼';
+      viewMoreBtn.querySelector('span:nth-child(2)').textContent = 'View More Currency Pairs';
+      document.getElementById('pairsList').scrollTo({ top: 0, behavior: 'smooth' });
     }
   });
+
+  // store scroll position (app-like)
+  const pairsEl = document.getElementById('pairsList');
+  const key = 'tradealgo_pairs_scroll';
+  pairsEl.addEventListener('scroll', ()=> localStorage.setItem(key, pairsEl.scrollTop));
+  window.addEventListener('load', ()=> { const s = localStorage.getItem(key); if(s) pairsEl.scrollTop = Number(s); });
 
 })();
 </script>
