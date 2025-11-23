@@ -20,10 +20,10 @@
   .heading { text-align:center; font-weight:700; font-size:16px; margin-bottom:10px; color:#fff;}
   .subtext{ text-align:center;color:rgba(230,238,248,0.65); font-size:12px; margin-bottom:14px; }
 
-  .card { background:#0a0d1d; border-radius:16px; border:1px solid #1a1f35; padding:16px; text-align:center; }
+  .card { background:#0a0d1d; border-radius:16px; border:1px solid #1a1f35; padding:16px; text-align:center; position:relative; }
 
   .pair-title{ font-weight:800; font-size:16px; margin-bottom:6px; }
-  .pair-meta{ font-size:12px; color:#7a86a8; margin-bottom:12px; }
+  .pair-meta{ font-size:12px; color:#7a86a8; margin-bottom:12px; opacity:0.95 }
 
   /* progress ring */
   .ring { width:120px;height:120px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center; position:relative; }
@@ -33,19 +33,33 @@
   .indicators{ display:flex; gap:10px; justify-content:center; margin-top:14px; margin-bottom:16px; }
   .ind-chip{ padding:8px 12px; border-radius:12px; background:#0a0d1d; border:1px solid #1a1f35; color:#fff; font-weight:700; font-size:12px; }
 
-  .btn-primary{ width:100%; padding:14px; border-radius:14px; border:none; font-weight:800; font-size:15px; color:#fff; cursor:pointer; background:linear-gradient(90deg,#5f2bff,#9a4dff); margin-bottom:12px; }
+  .btn-primary{ width:100%; padding:14px; border-radius:14px; border:none; font-weight:800; font-size:15px; color:#fff; cursor:pointer; background:linear-gradient(90deg,#5f2bff,#9a4dff); margin-bottom:12px; box-shadow: 0 6px 18px rgba(95,43,255,0.12); }
   .btn-ghost{ width:100%; padding:14px; border-radius:14px; border:1px solid #1a1f35; font-weight:700; font-size:15px; color:#7a86a8; background:transparent; cursor:pointer; }
 
   .powered{ text-align:center; font-size:11px; color:#5b6280; margin-top:10px; }
 
+  /* subscription modal */
   .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter: blur(4px); justify-content:center; align-items:center; z-index:9999; }
-  .modal .box{ background:#0b0f1e; color:#fff; padding:22px; border-radius:16px; width:92%; max-width:380px; border:1px solid #1f263b; text-align:center; }
+  .modal .box{ background:#0b0f1e; color:#fff; padding:22px; border-radius:16px; width:92%; max-width:420px; border:1px solid #1f263b; text-align:center; box-shadow: 0 30px 60px rgba(2,3,10,0.7); }
   .modal h3{ font-size:20px; margin-bottom:8px; }
   .modal p{ color:#9aa4bd; font-size:14px; margin-bottom:14px; line-height:1.45; }
   .modal .actions{ display:flex; gap:10px; justify-content:center; margin-top:8px; }
   .modal .actions a, .modal .actions button{ flex:1; padding:12px 10px; border-radius:12px; text-decoration:none; border:none; font-weight:800; cursor:pointer; }
   .modal .actions .tg{ background:linear-gradient(90deg,#5f2bff,#9a4dff); color:#fff; }
   .modal .actions .check{ background:#0a0f15; color:#9ff0c7; border:1px solid rgba(255,255,255,0.03); }
+
+  /* pending screen inside modal */
+  .pending-box { margin-top:12px; padding:14px; border-radius:12px; background: linear-gradient(180deg,#071028,#071022); border:1px solid rgba(255,255,255,0.02); color:#c8d2e6; text-align:left }
+  .pending-box p{ margin:0 0 8px 0; color:#9aa4bd; font-size:13px }
+  .pending-wait { display:flex; gap:10px; align-items:center; margin-top:8px; }
+  .pending-wait .dot { width:12px;height:12px;border-radius:999px;background:#6ee7b7; box-shadow: 0 6px 18px rgba(110,231,183,0.08) }
+  .pending-note { color:#9aa4bd; font-size:13px; }
+
+  .disabled { opacity:0.55; pointer-events:none; }
+
+  @media (min-width:520px) {
+    .modal .box { max-width:520px; }
+  }
 </style>
 </head>
 <body>
@@ -53,12 +67,12 @@
     <div class="heading">Advanced Trading Signals</div>
     <div class="subtext">Pairs · Time · Signal</div>
 
-    <div class="card">
+    <div class="card" id="mainCard">
       <div class="pair-title" id="pairTitle">EUR / USD (OTC)</div>
       <div class="pair-meta" id="pairMeta">Live Signal · 5s Frame</div>
 
       <div class="ring" aria-hidden="true">
-        <svg width="120" height="120" viewBox="0 0 120 120">
+        <svg width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="progress">
           <circle cx="60" cy="60" r="52" stroke="#22263b" stroke-width="8" fill="none"></circle>
           <circle id="progressCircle" cx="60" cy="60" r="52" stroke="#b06bff" stroke-width="8" stroke-linecap="round" fill="none" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
         </svg>
@@ -80,99 +94,207 @@
     </div>
   </div>
 
+  <!-- subscription modal -->
   <div class="modal" id="subModal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="box">
-      <h3>Subscription Required</h3>
-      <p>
-        To generate live AI trading signals you must activate a subscription through our official Telegram bot. Subscribing gives you instant verified access to real-time signals, push notifications, and automated trade execution options.
+    <div class="box" id="modalBox">
+      <h3 id="modalTitle">Subscription Required</h3>
+      <p id="modalText">
+        To generate live AI trading signals you must activate a subscription through our official Telegram bot. Subscribing gives you verified access to real-time signals, push notifications, and automated trade execution options.
       </p>
 
-      <div class="actions">
+      <div class="actions" id="modalActions">
         <a class="tg" id="tgLink" href="https://t.me/Trade_Algo_Robot?start=tradealgo_sub" target="_blank" rel="noopener noreferrer">Open Telegram Bot</a>
         <button class="check" id="iSubscribedBtn">I Subscribed</button>
       </div>
 
-      <div style="margin-top:12px;color:#7a86a8;font-size:12px">After subscribing, click "I Subscribed" to unlock signals (manual verify demo).</div>
+      <div id="pendingArea" style="display:none">
+        <div class="pending-box">
+          <p><strong>Upload proof of payment inside our Telegram bot.</strong></p>
+          <p class="pending-note">After you send the screenshot or receipt in Telegram, our support will verify the payment and activate your access instantly. This page will unlock when verification is complete.</p>
+
+          <div class="pending-wait">
+            <div style="flex:1">
+              <button id="tgLink2" class="tg" style="width:100%;padding:12px 10px;border-radius:12px;text-decoration:none;border:none;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#5f2bff,#9a4dff);color:#fff;">Open Telegram Bot</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+            <button id="waitingBtn" class="btn-ghost disabled" style="flex:1">Waiting for verification…</button>
+            <button id="cancelPending" class="btn-ghost" style="flex:1">Cancel</button>
+          </div>
+
+          <p style="margin-top:10px;color:#7a86a8;font-size:12px">If you are verified by Telegram support they can either redirect you back to this page with <code>?verified=1</code> or activate your account server-side. This demo requires the bot to mark the user as verified.</p>
+        </div>
+      </div>
     </div>
   </div>
 
 <script>
 (function(){
-  function qs(name){ const u = new URLSearchParams(location.search); return u.get(name); }
-  const pair = qs('pair') || 'EURUSD';
-  const map = {
-    EURUSD:'EUR / USD (OTC)',
-    GBPUSD:'GBP / USD (OTC)',
-    USDJPY:'USD / JPY (OTC)',
-    EURGBP:'EUR / GBP (OTC)',
-    AUDUSD:'AUD / USD (OTC)',
-    USDCHF:'USD / CHF (OTC)',
-    NZDUSD:'NZD / USD (OTC)',
-    USDCAD:'USD / CAD (OTC)'
-  };
-  document.getElementById('pairTitle').textContent = map[pair] || (pair.replace(/([A-Z]{3})([A-Z]{3})/,'$1 / $2') + ' (OTC)');
-})();
+  // UI elements
+  const generateBtn = document.getElementById('generateBtn');
+  const backBtn = document.getElementById('backBtn');
+  const subModal = document.getElementById('subModal');
+  const iSubBtn = document.getElementById('iSubscribedBtn');
+  const tgLink = document.getElementById('tgLink');
+  const tgLink2 = document.getElementById('tgLink2');
+  const modalActions = document.getElementById('modalActions');
+  const pendingArea = document.getElementById('pendingArea');
+  const waitingBtn = document.getElementById('waitingBtn');
+  const cancelPending = document.getElementById('cancelPending');
 
-/* progress animation */
-(function(){
-  const circle = document.getElementById('progressCircle');
-  const percentText = document.getElementById('percentText');
-  const radius = 52;
-  const circ = 2 * Math.PI * radius;
-  circle.style.strokeDasharray = `${circ}`;
-  let pct = 0;
+  // helper to read querystring
+  function qs(name){
+    const u = new URLSearchParams(location.search);
+    return u.get(name);
+  }
 
-  const interval = setInterval(()=>{
-    if(pct >= 73){ clearInterval(interval); return; }
-    pct += Math.floor(Math.random()*6)+2;
-    if(pct > 73) pct = 73;
-    const off = circ * (1 - pct/100);
-    circle.style.transition = 'stroke-dashoffset 0.35s ease';
-    circle.style.strokeDashoffset = off;
-    percentText.textContent = pct + '%';
-  }, 400);
+  // If bot returns user with ?verified=1 we mark verified in localStorage.
+  if(qs('verified') === '1'){
+    try {
+      localStorage.setItem('tradealgo_verified','1');
+      // clean URL (remove query)
+      const url = new URL(location.href);
+      url.searchParams.delete('verified');
+      history.replaceState({}, document.title, url.toString());
+      // feedback
+      alert('Verification successful — signals unlocked.');
+    } catch(e){}
+  }
 
-  setTimeout(()=>{ percentText.textContent = '73%'; circle.style.strokeDashoffset = circ * (1 - 73/100); }, 4100);
-})();
+  // Main check: if verified -> enable generate button
+  function isVerified(){
+    return localStorage.getItem('tradealgo_verified') === '1';
+  }
 
-/* FIXED: GitHub Pages path */
-document.getElementById('backBtn').addEventListener('click', ()=> {
-  window.location.href = 'https://abroxai.github.io/trade-algo-bot/index.html';
-});
+  function isPending(){
+    return localStorage.getItem('tradealgo_subscribed') === 'pending';
+  }
 
-const generateBtn = document.getElementById('generateBtn');
-const subModal = document.getElementById('subModal');
-const iSubBtn = document.getElementById('iSubscribedBtn');
-
-generateBtn.addEventListener('click', ()=> {
-  const subscribed = localStorage.getItem('tradealgo_subscribed') === '1';
-  if(subscribed){
-    generateBtn.textContent = 'Generating...';
-    generateBtn.disabled = true;
-    setTimeout(()=>{
+  function applyVerifiedState(){
+    if(isVerified()){
+      generateBtn.disabled = false;
       generateBtn.textContent = '⚡ Generate New Signal';
-      generateBtn.disabled=false;
-      alert('Signal generated: BUY 0.5 lot on ' + document.getElementById('pairTitle').textContent);
-    }, 1400);
-  } else {
+      generateBtn.classList.remove('disabled');
+    } else {
+      // start locked
+      generateBtn.disabled = false;
+      generateBtn.textContent = '⚡ Generate New Signal';
+    }
+  }
+
+  // initial UI
+  applyVerifiedState();
+
+  // Clicking back goes to index on your pages
+  backBtn.addEventListener('click', ()=> {
+    // keep absolute path for GitHub pages
+    window.location.href = 'https://abroxai.github.io/trade-algo-bot/index.html';
+  });
+
+  // "Generate" behaviour
+  generateBtn.addEventListener('click', ()=> {
+    if(isVerified()){
+      // real signal generation path
+      generateBtn.textContent = 'Generating...';
+      generateBtn.disabled = true;
+      setTimeout(()=>{
+        generateBtn.textContent = '⚡ Generate New Signal';
+        generateBtn.disabled = false;
+        alert('Signal generated: BUY 0.5 lot on ' + document.getElementById('pairTitle').textContent);
+      }, 1200);
+      return;
+    }
+
+    // Not verified -> show modal subscription flow
+    openSubscriptionModal();
+  });
+
+  // Open modal and show initial subscribe prompt
+  function openSubscriptionModal(){
     subModal.style.display = 'flex';
     subModal.setAttribute('aria-hidden','false');
+    // reset to initial view
+    modalActions.style.display = 'flex';
+    pendingArea.style.display = 'none';
+    waitingBtn.classList.add('disabled');
   }
-});
 
-iSubBtn.addEventListener('click', ()=> {
-  localStorage.setItem('tradealgo_subscribed','1');
-  subModal.style.display = 'none';
-  subModal.setAttribute('aria-hidden','true');
-  alert('Subscription acknowledged. You can now Generate New Signal.');
-});
+  // I Subscribed clicked -> switch to pending UI (no unlock)
+  iSubBtn.addEventListener('click', ()=>{
+    // mark pending (demo). Real verification is done in Telegram.
+    try { localStorage.setItem('tradealgo_subscribed','pending'); } catch(e){}
+    modalActions.style.display = 'none';
+    pendingArea.style.display = 'block';
+    waitingBtn.classList.add('disabled');
+    // open telegram in new tab as convenience
+    // (tgLink already opens new tab). Keep this non-automatic per user agent rules.
+  });
 
-subModal.addEventListener('click', (e)=>{
-  if(e.target === subModal){
+  // second telegram button in pending area
+  tgLink2.addEventListener('click', ()=>{
+    // open chat in a new tab/window
+    window.open('https://t.me/Trade_Algo_Robot?start=tradealgo_sub','_blank','noopener');
+  });
+
+  // Cancel pending resets state and closes modal
+  cancelPending.addEventListener('click', ()=>{
+    try { localStorage.removeItem('tradealgo_subscribed'); } catch(e){}
+    pendingArea.style.display = 'none';
+    modalActions.style.display = 'flex';
     subModal.style.display = 'none';
     subModal.setAttribute('aria-hidden','true');
-  }
-});
+  });
+
+  // Close modal on background click
+  subModal.addEventListener('click', (e)=>{
+    if(e.target === subModal){
+      subModal.style.display = 'none';
+      subModal.setAttribute('aria-hidden','true');
+    }
+  });
+
+  // Poll for verification state in localStorage so page can update if bot marks user verified.
+  // This is local-only by design (no placeholders). Your Telegram bot can cause verification by:
+  // 1) redirect user back to this page with ?verified=1  OR
+  // 2) trigger a client action (browser extension) that sets localStorage.tradealgo_verified = '1'
+  let pollTimer = setInterval(()=>{
+    if(isVerified()){
+      // unlock UI
+      waitingBtn.classList.remove('disabled');
+      waitingBtn.textContent = 'Verified — Ready';
+      // hide modal automatically if open
+      if(subModal.style.display === 'flex'){
+        setTimeout(()=>{ subModal.style.display='none'; subModal.setAttribute('aria-hidden','true'); }, 700);
+      }
+    }
+    applyVerifiedState();
+  }, 1200);
+
+  // Clean up on unload
+  window.addEventListener('beforeunload', ()=> clearInterval(pollTimer) );
+
+  // Progress ring animation (simulated)
+  (function(){
+    const circle = document.getElementById('progressCircle');
+    const percentText = document.getElementById('percentText');
+    const radius = 52;
+    const circumference = 2 * Math.PI * radius;
+    circle.style.strokeDasharray = `${circumference}`;
+    let pct = 0;
+    const interval = setInterval(()=>{
+      if(pct >= 73) { clearInterval(interval); return; }
+      pct += Math.floor(Math.random()*6)+2;
+      if(pct > 73) pct = 73;
+      const off = circumference * (1 - pct / 100);
+      circle.style.transition = 'stroke-dashoffset 0.35s ease';
+      circle.style.strokeDashoffset = off;
+      percentText.textContent = pct + '%';
+    }, 400);
+    setTimeout(()=>{ percentText.textContent = '73%'; circle.style.strokeDashoffset = circumference * (1 - 73/100); }, 4100);
+  })();
+
+})();
 </script>
 </body>
 </html>
