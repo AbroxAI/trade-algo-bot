@@ -149,6 +149,23 @@
     return u.get(name);
   }
 
+  // Read pair and timeframe from URL and apply to UI
+  function applyParamsToUI(){
+    const rawPair = qs('pair') || 'EURUSD';
+    const tf = qs('tf') || '5s';
+
+    // Format pair display: "EUR / USD (OTC)" when pair has 6 chars like EURUSD
+    let formatted = rawPair;
+    if(rawPair.length === 6){
+      const a = rawPair.slice(0,3);
+      const b = rawPair.slice(3);
+      formatted = `${a} / ${b}`;
+    }
+    // If user cares about showing OTC or not, keep "(OTC)" if pair has 'OTC' in badges - we keep current "(OTC)" for visual parity only.
+    document.getElementById('pairTitle').textContent = `${formatted} (OTC)`;
+    document.getElementById('pairMeta').textContent = `Live Signal · ${tf} Frame`;
+  }
+
   // If bot returns user with ?verified=1 we mark verified in localStorage.
   if(qs('verified') === '1'){
     try {
@@ -184,12 +201,13 @@
   }
 
   // initial UI
+  applyParamsToUI();
   applyVerifiedState();
 
-  // Clicking back goes to index on your pages
+  // Clicking back goes to index/pairs page
   backBtn.addEventListener('click', ()=> {
-    // keep absolute path for GitHub pages
-    window.location.href = 'https://abroxai.github.io/trade-algo-bot/index.html';
+    // canonical file name used by the project
+    window.location.href = 'index.html';
   });
 
   // "Generate" behaviour
@@ -255,9 +273,6 @@
   });
 
   // Poll for verification state in localStorage so page can update if bot marks user verified.
-  // This is local-only by design (no placeholders). Your Telegram bot can cause verification by:
-  // 1) redirect user back to this page with ?verified=1  OR
-  // 2) trigger a client action (browser extension) that sets localStorage.tradealgo_verified = '1'
   let pollTimer = setInterval(()=>{
     if(isVerified()){
       // unlock UI
