@@ -2,124 +2,174 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Trade Algo Bot — Time Frame</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Select Time Frame — Trade Algo Bot</title>
+
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{
-    font-family:-apple-system,Inter,Segoe UI,Roboto,sans-serif;
-    background:linear-gradient(180deg,#060718,#02030a);
-    color:#e9eef8;
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:12px;
-  }
-  .app{
-    width:100%;max-width:460px;height:calc(100vh - 24px);
-    background:linear-gradient(180deg,rgba(8,12,30,0.96),rgba(12,14,24,0.98));
-    border-radius:20px;
-    border:1px solid rgba(255,255,255,0.03);
-    box-shadow:0 28px 60px rgba(2,3,10,0.75),inset 0 -6px 30px rgba(2,3,10,0.2);
-    display:flex;flex-direction:column;overflow:hidden;
-  }
-  header{
-    padding:18px 16px 10px;
-    display:flex;align-items:center;justify-content:space-between;
-  }
-  .back{
-    width:38px;height:38px;border-radius:12px;
-    background:rgba(255,255,255,0.04);
-    display:flex;align-items:center;justify-content:center;
-    font-weight:700;font-size:20px;
-    box-shadow:0 6px 14px rgba(1,2,6,0.5);
-  }
-  .title{font-size:20px;font-weight:800}
-  .dot{opacity:.7;font-size:28px;line-height:0}
+    body {
+        margin: 0;
+        background: #0b0e19;
+        font-family: 'Poppins', sans-serif;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        padding: 20px;
+    }
 
-  .section{
-    padding:20px;text-align:center;
-  }
-  .section h2{font-size:20px;font-weight:800;margin-bottom:6px;color:#f3f6fb}
-  .section p{font-size:13px;color:rgba(230,238,248,0.6)}
+    .container {
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+    }
 
-  .tf-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:14px;
-    padding:20px;
-  }
-  .tf-card{
-    background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
-    border:1px solid rgba(255,255,255,0.03);
-    padding:22px 10px;
-    border-radius:14px;
-    text-align:center;
-    font-weight:800;
-    font-size:18px;
-    box-shadow:0 10px 20px rgba(0,0,0,0.45);
-    transition:0.1s;
-  }
-  .tf-card:active{transform:scale(0.97)}
-  .tf-sub{font-size:12px;margin-top:6px;color:rgba(255,255,255,0.65);font-weight:600}
+    .title-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 2px solid #42507a;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 18px auto;
+        font-size: 26px;
+        opacity: 0.8;
+    }
 
-  .recommend{
-    padding:0 20px;
-    font-size:12px;
-    color:rgba(200,210,230,0.7);
-    margin-top:10px;
-  }
+    h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #d5dbff;
+    }
 
-  .back-btn{
-    margin:40px auto 0;
-    width:92%;
-    padding:12px;
-    border-radius:12px;
-    background:rgba(255,255,255,0.05);
-    text-align:center;
-    font-weight:700;
-    border:1px solid rgba(255,255,255,0.05);
-    cursor:pointer;
-  }
+    p.sub {
+        margin-top: 6px;
+        margin-bottom: 22px;
+        font-size: 13px;
+        color: #7c86a5;
+    }
+
+    .box-area {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .box {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        padding: 18px 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .box:hover {
+        transform: scale(1.03);
+        border-color: #6c4cff;
+    }
+
+    .box-icon {
+        font-size: 22px;
+        margin-bottom: 4px;
+    }
+
+    .box-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .box-sub {
+        font-size: 12px;
+        color: #9aa3bc;
+        margin-top: 4px;
+    }
+
+    .recommend-text {
+        font-size: 12px;
+        color: #7a86a8;
+        text-align: left;
+        margin: 10px 0 18px 2px;
+        line-height: 1.35;
+    }
+
+    .back-btn {
+        width: 100%;
+        padding: 13px 12px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #d7dcff;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .back-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+    }
 </style>
+
 </head>
+
 <body>
-<div class="app">
-  <header>
-    <div class="back">‹</div>
-    <div class="title">Time</div>
-    <div class="dot">•</div>
-  </header>
 
-  <div class="section">
+<div class="container">
+    
+    <!-- Top Icon -->
+    <div class="title-icon">⏱️</div>
+
     <h2>Select Time Frame</h2>
-    <p>Choose your analysis period</p>
-  </div>
+    <p class="sub">Choose your analysis period</p>
 
-  <div class="tf-grid">
-    <div class="tf-card">
-      5s
-      <div class="tf-sub">Ultra Fast</div>
-    </div>
-    <div class="tf-card">
-      15s
-      <div class="tf-sub">Medium</div>
-    </div>
-    <div class="tf-card">
-      30s
-      <div class="tf-sub">Stable</div>
-    </div>
-    <div class="tf-card">
-      60s
-      <div class="tf-sub">Recommended</div>
-    </div>
-  </div>
+    <!-- Boxes -->
+    <div class="box-area">
 
-  <div class="recommend">60 seconds is optimal for quick signals with good accuracy</div>
+        <div class="box" onclick="selectTime('5s')">
+            <div class="box-icon">⚡</div>
+            <div class="box-title">5s</div>
+            <div class="box-sub">Ultra Fast</div>
+        </div>
 
-  <div class="back-btn">← Back to Pairs</div>
+        <div class="box" onclick="selectTime('30s')">
+            <div class="box-icon">🔥</div>
+            <div class="box-title">30s</div>
+            <div class="box-sub">Stable</div>
+        </div>
+
+        <div class="box" onclick="selectTime('15s')">
+            <div class="box-icon">⭐</div>
+            <div class="box-title">15s</div>
+            <div class="box-sub">Medium</div>
+        </div>
+
+        <div class="box" onclick="selectTime('60s')">
+            <div class="box-icon">💠</div>
+            <div class="box-title">60s</div>
+            <div class="box-sub">Optimal</div>
+        </div>
+
+    </div>
+
+    <div class="recommend-text">
+        <strong>Recommended:</strong><br>
+        60 seconds is optimal for quick signals with good accuracy.
+    </div>
+
+    <button class="back-btn" onclick="window.location.href='pairs.html'">← Back to Pairs</button>
 
 </div>
+
+<script>
+function selectTime(tf) {
+    window.location.href = "dashboard.html?tf=" + tf;
+}
+</script>
+
 </body>
 </html>
