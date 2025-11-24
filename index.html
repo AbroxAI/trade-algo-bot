@@ -292,19 +292,19 @@
 
 <script>
 (function(){
-  // dashboard path on your GitHub Pages (adjust username if needed)
-  const DASH = 'https://AbroxAI.github.io/trade-algo-bot/dashboard.html';
+  // timeframe page path on your GitHub Pages (adjust username if needed)
+  const TIMEFRAME_PAGE = 'timeframe.html';
 
-  function openDashboard(pairId){
-    const url = `${DASH}?pair=${encodeURIComponent(pairId)}`;
+  function openTimeframe(pairId){
+    const url = `${TIMEFRAME_PAGE}?pair=${encodeURIComponent(pairId)}`;
     window.location.href = url;
   }
 
-  // Wire visible initial cards
+  // Wire visible initial cards -> go to timeframe (not directly to signal)
   document.querySelectorAll('.pair-card').forEach(card=>{
     card.addEventListener('click', function(){
       const pair = this.dataset.pair || 'EURUSD';
-      openDashboard(pair);
+      openTimeframe(pair);
     });
   });
 
@@ -348,7 +348,7 @@
         badgeC.appendChild(be);
       });
     }
-    div.addEventListener('click', ()=> openDashboard(d.pair));
+    div.addEventListener('click', ()=> openTimeframe(d.pair));
     extraPairsEl.appendChild(div);
   });
 
