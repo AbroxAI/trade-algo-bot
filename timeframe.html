@@ -161,14 +161,32 @@
         60 seconds is optimal for quick signals with good accuracy.
     </div>
 
-    <button class="back-btn" onclick="window.location.href='pairs.html'">← Back to Pairs</button>
+    <button class="back-btn" id="backBtn">← Back to Pairs</button>
 
 </div>
 
 <script>
-function selectTime(tf) {
-    window.location.href = "dashboard.html?tf=" + tf;
+// read querystring helper
+function qs(name){
+  const u = new URLSearchParams(location.search);
+  return u.get(name);
 }
+
+// get pair from index query param (index -> timeframe passed ?pair=)
+const selectedPair = qs('pair') || 'EURUSD';
+
+// Select time and go to dashboard, include pair and timeframe
+function selectTime(tf) {
+    // navigate to dashboard with both pair and tf
+    const url = `dashboard.html?pair=${encodeURIComponent(selectedPair)}&tf=${encodeURIComponent(tf)}`;
+    window.location.href = url;
+}
+
+// Back button - go back to index/pairs. Use index.html filename which is the canonical page.
+document.getElementById('backBtn').addEventListener('click', function(){
+    // try index.html first (canonical). If your hosting uses pairs.html, index.html normally exists.
+    window.location.href = 'index.html';
+});
 </script>
 
 </body>
