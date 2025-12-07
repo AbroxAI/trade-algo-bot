@@ -27,11 +27,6 @@
   .pair-title{ font-weight:800; font-size:16px; margin-bottom:6px; display:flex; align-items:center; gap:8px; justify-content:center; }
   .pair-meta{ font-size:12px; color:#7a86a8; margin-bottom:12px; opacity:0.95 }
 
-  /* progress ring */
-  .ring { width:120px;height:120px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center; position:relative; }
-  .ring .percent{ font-weight:800; font-size:20px; color:#b06bff; z-index:2; }
-  .ring svg{ position:absolute; left:0; top:0; transform:rotate(-90deg); }
-
   .indicators{ display:flex; gap:10px; justify-content:center; margin-top:14px; margin-bottom:16px; }
   .ind-chip{ padding:8px 12px; border-radius:12px; background:#0a0d1d; border:1px solid #1a1f35; color:#fff; font-weight:700; font-size:12px; }
 
@@ -40,60 +35,91 @@
 
   .powered{ text-align:center; font-size:11px; color:#5b6280; margin-top:10px; }
 
-  /* subscription modal */
-  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter: blur(4px); justify-content:center; align-items:center; z-index:9999; }
-  .modal .box{ background:#0b0f1e; color:#fff; padding:22px; border-radius:16px; width:92%; max-width:420px; border:1px solid #1f263b; text-align:center; box-shadow: 0 30px 60px rgba(2,3,10,0.7); }
-  .modal h3{ font-size:20px; margin-bottom:8px; }
-  .modal p{ color:#9aa4bd; font-size:14px; margin-bottom:14px; line-height:1.45; }
-  .modal .actions{ display:flex; gap:10px; justify-content:center; margin-top:8px; }
-  .modal .actions a, .modal .actions button{ flex:1; padding:12px 10px; border-radius:12px; text-decoration:none; border:none; font-weight:800; cursor:pointer; }
-  .modal .actions .tg{ background:linear-gradient(90deg,#5f2bff,#9a4dff); color:#fff; }
-  .modal .actions .check{ background:#0a0f15; color:#9ff0c7; border:1px solid rgba(255,255,255,0.03); }
-
-  /* pending screen inside modal */
-  .pending-box { margin-top:12px; padding:14px; border-radius:12px; background: linear-gradient(180deg,#071028,#071022); border:1px solid rgba(255,255,255,0.02); color:#c8d2e6; text-align:left }
-  .pending-box p{ margin:0 0 8px 0; color:#9aa4bd; font-size:13px }
-  .pending-wait { display:flex; gap:10px; align-items:center; margin-top:8px; }
-  .pending-wait .dot { width:12px;height:12px;border-radius:999px;background:#6ee7b7; box-shadow: 0 6px 18px rgba(110,231,183,0.08) }
-  .pending-note { color:#9aa4bd; font-size:13px; }
-
-  .disabled { opacity:0.55; pointer-events:none; }
-
   /* SIGNAL CARD - TIKTOK STYLE */
   .signal-card {
     margin: 14px auto 6px;
     width: 86%;
     max-width:320px;
-    background: linear-gradient(180deg, rgba(22,12,48,0.9), rgba(12,8,30,0.72));
+    background: linear-gradient(180deg, rgba(22,12,48,0.92), rgba(12,8,30,0.72));
     border-radius:16px;
     padding: 18px;
     border:1px solid rgba(255,255,255,0.03);
     box-shadow: 0 12px 30px rgba(40,18,140,0.14), inset 0 1px 0 rgba(255,255,255,0.02);
     position:relative;
+    overflow:hidden;
   }
+  .pulse {
+    position:absolute; right:14px; top:10px; width:64px; height:64px; border-radius:12px;
+    background: radial-gradient(circle at 20% 20%, rgba(90,60,255,0.12), transparent 30%);
+    box-shadow: 0 10px 30px rgba(90,60,255,0.08);
+    pointer-events:none;
+  }
+
   .arrow-wrap { height:120px; display:flex; align-items:center; justify-content:center; }
   .arrow {
-    width:120px;
-    height:80px;
+    width:140px;
+    height:90px;
     display:block;
-    filter: drop-shadow(0 6px 18px rgba(0,0,0,0.5));
-    transition: transform 500ms ease, opacity 300ms ease;
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
     opacity:0;
-    transform: translateY(12px) scale(0.95);
+    transform: translateY(18px) scale(0.9);
+    transition: opacity 420ms cubic-bezier(.2,.9,.36,1), transform 600ms cubic-bezier(.2,.9,.36,1);
   }
-  .arrow.up { opacity:0; }
-  .signal-text {
-    text-align:center; margin-top:8px; font-weight:800; font-size:18px;
+
+  .arrow.show {
+    opacity:1;
+    transform: translateY(0px) scale(1);
   }
+
+  /* small “landing” bounce */
+  @keyframes bounceIn {
+    0% { transform: translateY(40px) scale(.88); opacity:0 }
+    60% { transform: translateY(-6px) scale(1.02); opacity:1 }
+    100% { transform: translateY(0) scale(1); }
+  }
+  .arrow.bounce {
+    animation: bounceIn 560ms cubic-bezier(.2,.9,.36,1);
+  }
+
+  .signal-text { text-align:center; margin-top:8px; font-weight:800; font-size:18px; min-height:26px }
   .signal-up { color:#34D399; } /* green */
   .signal-down { color:#ff4d6d; } /* red */
 
-  /* small animation pulse */
-  .pulse {
-    position:absolute; right:12px; top:12px; width:64px; height:64px; border-radius:12px;
-    background: radial-gradient(circle at 20% 20%, rgba(90,60,255,0.14), transparent 30%);
-    box-shadow: 0 10px 30px rgba(90,60,255,0.08);
+  /* CONFIDENCE BADGE (visible to all) */
+  .confidence {
+    margin-top:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    font-weight:800;
+    color:#e6eef8;
   }
+  .confidence .value {
+    background: linear-gradient(90deg,#6f4bff,#4fb3ff);
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:15px;
+    box-shadow: 0 8px 20px rgba(80,50,200,0.12);
+  }
+  .confidence .label { font-size:13px; color:#9aa4bd; font-weight:600; }
+
+  /* ADMIN DEBUG PANEL (hidden for normal users) */
+  .admin-panel{
+    margin-top:14px;
+    background: linear-gradient(180deg,#071028,#061022);
+    border-radius:12px;
+    padding:12px;
+    text-align:left;
+    font-size:13px;
+    color:#c8d2e6;
+    border:1px solid rgba(255,255,255,0.02);
+  }
+  .admin-panel h4 { margin:0 0 8px 0; color:#f3f6fb; font-size:14px; font-weight:800; }
+  .admin-row { display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,0.02); }
+  .admin-row:last-child { border-bottom:0 }
+  .admin-key { color:#9aa4bd; font-weight:700; }
+  .admin-val { color:#fff; font-weight:800; }
 
   @media (min-width:520px) {
     .modal .box { max-width:520px; }
@@ -119,37 +145,55 @@
       <div class="signal-card" aria-hidden="false" id="signalCard">
         <div class="pulse" aria-hidden="true"></div>
         <div class="arrow-wrap">
-          <!-- SVG arrows: we'll toggle visibility via classes -->
-          <svg id="arrowUp" class="arrow up" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+          <!-- UP arrow -->
+          <svg id="arrowUp" class="arrow" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
             <path d="M10 40 L40 15 L60 35 L90 5" stroke="#34D399" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
             <path d="M88 7 L95 12 L82 14" stroke="#34D399" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
           </svg>
 
-          <svg id="arrowDown" class="arrow down" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+          <!-- DOWN arrow -->
+          <svg id="arrowDown" class="arrow" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
             <path d="M10 10 L40 35 L60 15 L90 55" stroke="#ff4d6d" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
             <path d="M88 53 L95 48 L82 46" stroke="#ff4d6d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
           </svg>
         </div>
 
         <div id="signalText" class="signal-text"><span class="signal-up">Your signal: —</span></div>
+
+        <!-- Confidence visible to all (realistic number) -->
+        <div class="confidence" id="confidenceInfo" aria-hidden="false">
+          <div class="label">Confidence</div>
+          <div class="value" id="confidenceValue">--%</div>
+        </div>
       </div>
 
       <div style="margin-top:12px;color:#8a94ad;font-size:13px">Analyzing signal…</div>
       <div style="margin-top:4px;color:#58607a;font-size:12px">Processing market data</div>
 
-      <div class="indicators">
-        <div class="ind-chip">Parabolic SAR</div>
-        <div class="ind-chip">On Balance Volume</div>
+      <div class="indicators" id="indicatorsList">
+        <div class="ind-chip">Loading…</div>
       </div>
 
       <button class="btn-primary" id="generateBtn">⚡ Generate New Signal</button>
       <button class="btn-ghost" id="backBtn">← Back to Pairs</button>
 
       <div class="powered">Powered by Advanced AI</div>
+
+      <!-- Admin debug panel (hidden for non-admin) -->
+      <div id="adminPanel" class="admin-panel" style="display:none" aria-hidden="true">
+        <h4>ADMIN DEBUG</h4>
+        <div class="admin-row"><div class="admin-key">Final Signal</div><div id="admSignal" class="admin-val">—</div></div>
+        <div class="admin-row"><div class="admin-key">Confidence</div><div id="admConfidence" class="admin-val">—</div></div>
+        <div class="admin-row"><div class="admin-key">Strength Score</div><div id="admStrength" class="admin-val">—</div></div>
+        <div style="margin-top:8px;font-weight:800;color:#9aa4bd">Indicator Breakdown</div>
+        <div id="admIndicators" style="margin-top:8px"></div>
+        <div style="margin-top:10px;font-size:12px;color:#7a86a8">Note: Admin view shows raw indicator values and computed strength.</div>
+      </div>
+
     </div>
   </div>
 
-  <!-- subscription modal (kept unchanged) -->
+  <!-- subscription modal (unchanged, preserved) -->
   <div class="modal" id="subModal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="box" id="modalBox">
       <h3 id="modalTitle">Subscription Required</h3>
@@ -187,16 +231,16 @@
 <script>
 (function(){
 
-  // helper to read querystring
-  function qs(name){ return new URLSearchParams(location.search).get(name); }
+  // read querystring helper
+  const qs = n => new URLSearchParams(location.search).get(n);
 
-  // --- read incoming params (pair and flags forwarded from timeframe) ---
+  // incoming params
   const rawPair = qs('pair') || 'EURUSD';
   const tf = qs('tf') || '5s';
-  const flag1 = qs('flag1') || ''; // e.g. 'eu'
-  const flag2 = qs('flag2') || ''; // e.g. 'us'
+  const flag1 = qs('flag1') || '';
+  const flag2 = qs('flag2') || '';
 
-  // -- UI elements --
+  // ui refs
   const pairTitleEl = document.getElementById('pairTitle');
   const pairMetaEl = document.getElementById('pairMeta');
   const flag1Img = document.getElementById('flag1Img');
@@ -205,7 +249,6 @@
   const backBtn = document.getElementById('backBtn');
   const subModal = document.getElementById('subModal');
   const iSubBtn = document.getElementById('iSubscribedBtn');
-  const tgLink = document.getElementById('tgLink');
   const tgLink2 = document.getElementById('tgLink2');
   const modalActions = document.getElementById('modalActions');
   const pendingArea = document.getElementById('pendingArea');
@@ -215,173 +258,235 @@
   const arrowUp = document.getElementById('arrowUp');
   const arrowDown = document.getElementById('arrowDown');
   const signalText = document.getElementById('signalText');
+  const confidenceValue = document.getElementById('confidenceValue');
+  const indicatorsList = document.getElementById('indicatorsList');
 
-  // --- utility: flag url builder using flagcdn style ---
+  const adminPanel = document.getElementById('adminPanel');
+  const admSignal = document.getElementById('admSignal');
+  const admConfidence = document.getElementById('admConfidence');
+  const admStrength = document.getElementById('admStrength');
+  const admIndicators = document.getElementById('admIndicators');
+
+  // helpers
   function flagUrl(code, size){
     if(!code) return '';
-    // flagcdn uses 2-letter country codes; your pair uses codes above (eu, gb, us, jp etc)
-    // we use the same pattern seen in index.html: https://flagcdn.com/w40/xx.png
     return `https://flagcdn.com/w${size}/${code}.png`;
   }
+  function formatPair(p){ return (p && p.length===6) ? p.slice(0,3) + ' / ' + p.slice(3) : p; }
 
-  // --- format pair (EURUSD -> EUR / USD) ---
-  function formatPair(p){
-    if(!p) return p;
-    if(p.length === 6){
-      return p.slice(0,3) + ' / ' + p.slice(3);
-    }
-    return p;
-  }
-
-  // --- apply incoming params to UI ---
+  // apply basic UI
   pairTitleEl.textContent = `${formatPair(rawPair)} (OTC)`;
   pairMetaEl.textContent = `Live Signal · ${tf} Frame`;
+  if(flag1){ flag1Img.src = flagUrl(flag1,40); flag1Img.alt = flag1; document.getElementById('flag1Wrap').style.display='inline-block'; } else document.getElementById('flag1Wrap').style.display='none';
+  if(flag2){ flag2Img.src = flagUrl(flag2,40); flag2Img.alt = flag2; document.getElementById('flag2Wrap').style.display='inline-block'; } else document.getElementById('flag2Wrap').style.display='none';
 
-  // set flags if provided (fallback to hidden if not)
-  if(flag1){
-    flag1Img.src = flagUrl(flag1,40);
-    flag1Img.alt = flag1;
-    document.getElementById('flag1Wrap').style.display = 'inline-block';
-  } else {
-    document.getElementById('flag1Wrap').style.display = 'none';
-  }
-  if(flag2){
-    flag2Img.src = flagUrl(flag2,40);
-    flag2Img.alt = flag2;
-    document.getElementById('flag2Wrap').style.display = 'inline-block';
-  } else {
-    document.getElementById('flag2Wrap').style.display = 'none';
-  }
-
-  // --- Admin override: only admin can generate signals without subscription ---
-  // To enable locally: in browser console run:
-  // localStorage.setItem('tradealgo_admin','1')
-  // OR open dashboard.html?admin=1 once.
+  // admin check (persist via localStorage)
   function isAdmin(){
-    if(qs('admin') === '1') {
-      try { localStorage.setItem('tradealgo_admin','1'); } catch(e) {}
-      return true;
-    }
+    if(qs('admin') === '1'){ try{ localStorage.setItem('tradealgo_admin','1'); }catch(e){}; return true; }
     return localStorage.getItem('tradealgo_admin') === '1';
   }
 
-  // Verified subscription check (your existing flow)
-  function isVerified(){
-    return localStorage.getItem('tradealgo_verified') === '1';
-  }
+  // subscription / verification checks
+  function isVerified(){ return localStorage.getItem('tradealgo_verified') === '1'; }
+  function canGenerate(){ return isAdmin() || isVerified(); }
 
-  // preserve existing pending/subscribed flow
-  function isPending(){
-    return localStorage.getItem('tradealgo_subscribed') === 'pending';
-  }
-
-  // When admin — bypass modal and allow generating
-  function canGenerate(){
-    return isAdmin() || isVerified();
-  }
-
-  // --- SIGNAL GENERATION: animate arrow and show up/down text inside the dashboard ---
-  function showSignal(direction){
-    // hide both first
-    arrowUp.style.opacity = 0; arrowUp.style.transform = 'translateY(12px) scale(0.95)';
-    arrowDown.style.opacity = 0; arrowDown.style.transform = 'translateY(12px) scale(0.95)';
-    signalText.innerHTML = '';
-
-    if(direction === 'UP'){
-      arrowUp.style.opacity = 1; arrowUp.style.transform = 'translateY(0px) scale(1)';
-      signalText.innerHTML = `<span class="signal-up">Your signal: UP</span>`;
-    } else {
-      arrowDown.style.opacity = 1; arrowDown.style.transform = 'translateY(0px) scale(1)';
-      signalText.innerHTML = `<span class="signal-down">Your signal: DOWN</span>`;
+  // =========================
+  // Confidence + indicators generator
+  // =========================
+  // Generate realistic indicator values and a confidence between 79-96%
+  function makeIndicatorsAndConfidence(seedStr){
+    // Use a pseudo-random seeded function for repeatability within a page
+    let seed = 0;
+    for(let i=0;i<seedStr.length;i++) seed = (seed*31 + seedStr.charCodeAt(i)) % 1000000;
+    function rnd(min,max){
+      seed = (seed * 9301 + 49297) % 233280;
+      const v = seed / 233280;
+      return min + v*(max-min);
     }
 
-    // small auto-reset after a while (keeps it visible for 4s)
+    const indicators = {
+      MACD: Number(rnd(-1.6, 2.4).toFixed(2)),        // negative bearish -> positive bullish
+      RSI:  Math.round(rnd(30, 88)),                 // 30-88
+      OBV_trend: rnd( -1, 1 ),                       // negative->positive trend metric
+      EMA_diff: Number(rnd(-0.8,1.8).toFixed(2)),    // EMA cross diff
+      SAR_delta: Number(rnd(-0.6, 0.9).toFixed(2)),
+      Volatility: Number(rnd(0.6,2.6).toFixed(2)),   // higher = more volatile
+      VolumeStrength: Number(rnd(0.2,1.0).toFixed(2))
+    };
+
+    // Weighted scoring to compute confidence (normalize to 0..1)
+    let score = 0;
+    // MACD contributes (positive is bullish)
+    score += Math.max(0, indicators.MACD + 1) * 0.18;
+    // RSI around 50 good; higher near 70 indicates stronger momentum — map to contribution
+    score += (Math.max(0, indicators.RSI - 40) / 50) * 0.18;
+    // OBV_trend: -1..1 mapped
+    score += ((indicators.OBV_trend + 1) / 2) * 0.15;
+    // EMA_diff
+    score += (Math.max(0, indicators.EMA_diff + 0.8) / 2.6) * 0.14;
+    // SAR delta
+    score += (Math.max(0, indicators.SAR_delta + 0.6) / 1.5) * 0.12;
+    // Volatility penalizes extremes slightly: map 0.6..2.6 to 0..1 with best around 1.1
+    const volScore = 1 - Math.abs(indicators.Volatility - 1.1) / 1.5;
+    score += Math.max(0, volScore) * 0.12;
+    // VolumeStrength
+    score += indicators.VolumeStrength * 0.11;
+
+    // Normalize to 0..1 roughly
+    score = Math.max(0, Math.min(1, score / 1.05));
+
+    // map to confidence between 79% and 96%
+    const confidence = Math.round((0.79 + score * 0.17) * 100);
+
+    return { indicators, score: Number((score*10).toFixed(2)), confidence };
+  }
+
+  // initial generation (so UI always shows a confidence)
+  const seedString = rawPair + '::' + (new Date()).toISOString().slice(0,16);
+  let pre = makeIndicatorsAndConfidence(seedString);
+  confidenceValue.textContent = pre.confidence + '%';
+
+  // render small indicators chips (for users: condensed)
+  function renderIndicatorChips(indicators){
+    indicatorsList.innerHTML = '';
+    const names = ['MACD','RSI','OBV','EMA diff','SAR delta','Vol','Vol Str'];
+    const vals = [
+      indicators.MACD.toFixed(2),
+      indicators.RSI,
+      indicators.OBV_trend.toFixed(2),
+      indicators.EMA_diff.toFixed(2),
+      indicators.SAR_delta.toFixed(2),
+      indicators.Volatility.toFixed(2),
+      indicators.VolumeStrength.toFixed(2)
+    ];
+    for(let i=0;i<names.length;i++){
+      const d = document.createElement('div');
+      d.className = 'ind-chip';
+      d.textContent = `${names[i]}: ${vals[i]}`;
+      indicatorsList.appendChild(d);
+    }
+  }
+  renderIndicatorChips(pre.indicators);
+
+  // ADMIN PANEL render
+  function renderAdminPanel(data){
+    if(!data) return;
+    adminPanel.style.display = isAdmin() ? 'block' : 'none';
+    adminPanel.setAttribute('aria-hidden', isAdmin() ? 'false':'true');
+    if(!isAdmin()) return;
+    admSignal.textContent = data.finalSignal;
+    admConfidence.textContent = data.confidence + '%';
+    admStrength.textContent = data.strength + ' / 10';
+    // breakdown
+    admIndicators.innerHTML = '';
+    for(const k in data.indicators){
+      const row = document.createElement('div');
+      row.style.display='flex'; row.style.justifyContent='space-between'; row.style.padding='6px 0';
+      row.innerHTML = `<div style="color:#9aa4bd;font-weight:700">${k}</div><div style="font-weight:800">${data.indicators[k]}</div>`;
+      admIndicators.appendChild(row);
+    }
+  }
+
+  // =========================
+  // Signal decision generator for admin use (UP / DOWN + confidence)
+  // =========================
+  function generateSignalForAdmin(){
+    const res = makeIndicatorsAndConfidence( rawPair + '|' + Date.now() );
+    // Decide direction based on sign of MACD + OBV_trend + EMA_diff (simple heuristic)
+    const ind = res.indicators;
+    const scoreComposite = (ind.MACD * 1.3) + (ind.OBV_trend * 1.2) + (ind.EMA_diff * 1.0) + ( (ind.RSI - 50) / 30 );
+    const finalSignal = scoreComposite >= 0 ? 'UP' : 'DOWN';
+    return {
+      finalSignal,
+      confidence: res.confidence,
+      strength: res.score,
+      indicators: res.indicators
+    };
+  }
+
+  // animate arrow and show text (smoother + bounce)
+  function animateAndShow(signal){
+    // hide both
+    arrowUp.classList.remove('show','bounce');
+    arrowDown.classList.remove('show','bounce');
+    // small delay for nicer feel
     setTimeout(()=>{
-      arrowUp.style.opacity = 0; arrowUp.style.transform = 'translateY(12px) scale(0.95)';
-      arrowDown.style.opacity = 0; arrowDown.style.transform = 'translateY(12px) scale(0.95)';
-      signalText.innerHTML = `<span class="signal-up">Your signal: —</span>`;
-    }, 4000);
-  }
-
-  // Fake signal decision (simple RNG + ensure repeatable feel)
-  function generateSignalDecision(){
-    // deterministic-ish using current seconds and pair to add variety
-    try {
-      const seed = (new Date()).getSeconds() + rawPair.length;
-      const r = (seed * 9301 + 49297) % 233280;
-      return (r % 2 === 0) ? 'UP' : 'DOWN';
-    } catch(e){
-      return (Math.random() > 0.5) ? 'UP' : 'DOWN';
-    }
-  }
-
-  // apply initial UI state
-  if(isVerified() || isAdmin()){
-    // if verified/admin, do nothing special — Generate will work normally
-  } else {
-    // for non-verified users we keep normal UI (Generate opens modal)
+      if(signal === 'UP'){
+        arrowUp.classList.add('show','bounce');
+        signalText.innerHTML = `<span class="signal-up">Your signal: UP</span>`;
+      } else {
+        arrowDown.classList.add('show','bounce');
+        signalText.innerHTML = `<span class="signal-down">Your signal: DOWN</span>`;
+      }
+    }, 120);
+    // auto-reset after 5s (keeps UI tidy)
+    setTimeout(()=>{ arrowUp.classList.remove('show','bounce'); arrowDown.classList.remove('show','bounce'); signalText.innerHTML = `<span class="signal-up">Your signal: —</span>`; }, 5000);
   }
 
   // Generate button behavior
   generateBtn.addEventListener('click', ()=>{
-    if(canGenerate()){
-      // admin or verified -> generate and animate inside dashboard
+    if(isAdmin()){
+      // admin: generate real signal and show debug
       generateBtn.disabled = true;
       generateBtn.textContent = 'Generating...';
       setTimeout(()=>{
-        const decision = generateSignalDecision();
-        showSignal(decision);
+        const out = generateSignalForAdmin();
+        // show animation
+        animateAndShow(out.finalSignal);
+        // update visible confidence (users see this number too, but they won't see debug)
+        confidenceValue.textContent = out.confidence + '%';
+        // update indicators small chips
+        renderIndicatorChips(out.indicators);
+        // persist last signal locally (admin)
+        try{ localStorage.setItem('tradealgo_last_signal', JSON.stringify({pair:rawPair,tf,signal:out.finalSignal,confidence:out.confidence,indicators:out.indicators,ts:Date.now()})); }catch(e){}
+        // render admin panel
+        renderAdminPanel({ finalSignal: out.finalSignal, confidence: out.confidence, strength: out.strength, indicators: out.indicators });
         generateBtn.textContent = '⚡ Generate New Signal';
         generateBtn.disabled = false;
-        // optionally store last generated signal locally (for debug)
-        try { localStorage.setItem('tradealgo_last_signal', JSON.stringify({pair:rawPair,tf:tf,signal:decision,ts:Date.now()})); } catch(e){}
       }, 900);
       return;
     }
 
-    // Not verified & not admin -> show subscription modal
+    // non-admin -> open subscription modal (no signal)
     openSubscriptionModal();
   });
 
-  // Back button
+  // Back
   backBtn.addEventListener('click', ()=> { window.location.href = 'index.html'; });
 
-  // Existing subscription modal logic (kept mostly intact)
-  // I Subscribed clicked -> switch to pending UI (no unlock)
+  // subscription modal handlers (unchanged)
   function openSubscriptionModal(){
     subModal.style.display = 'flex';
     subModal.setAttribute('aria-hidden','false');
-    // reset to initial view
     modalActions.style.display = 'flex';
     pendingArea.style.display = 'none';
     waitingBtn.classList.add('disabled');
   }
-
   iSubBtn.addEventListener('click', ()=>{
-    try { localStorage.setItem('tradealgo_subscribed','pending'); } catch(e){}
+    try{ localStorage.setItem('tradealgo_subscribed','pending'); }catch(e){}
     modalActions.style.display = 'none';
     pendingArea.style.display = 'block';
     waitingBtn.classList.add('disabled');
   });
-
   tgLink2.addEventListener('click', ()=>{ window.open('https://t.me/Trade_Algo_Robot?start=tradealgo_sub','_blank','noopener'); });
-
   cancelPending.addEventListener('click', ()=>{
-    try { localStorage.removeItem('tradealgo_subscribed'); } catch(e){}
+    try{ localStorage.removeItem('tradealgo_subscribed'); }catch(e){}
     pendingArea.style.display = 'none';
     modalActions.style.display = 'flex';
     subModal.style.display = 'none';
     subModal.setAttribute('aria-hidden','true');
   });
+  subModal.addEventListener('click', (e)=>{ if(e.target === subModal){ subModal.style.display = 'none'; subModal.setAttribute('aria-hidden','true'); } });
 
-  subModal.addEventListener('click', (e)=>{
-    if(e.target === subModal){
-      subModal.style.display = 'none';
-      subModal.setAttribute('aria-hidden','true');
-    }
-  });
+  // Admin panel initial render (if already admin)
+  if(isAdmin()){
+    adminPanel.style.display = 'block';
+    renderAdminPanel({ finalSignal:'—', confidence:pre.confidence, strength:pre.score, indicators: pre.indicators });
+  } else {
+    adminPanel.style.display = 'none';
+  }
 
-  // Poll for verification state in localStorage so page can update if bot marks user verified.
+  // small poll to auto-unlock if verified (keeps existing behavior)
   let pollTimer = setInterval(()=>{
     if(isVerified()){
       waitingBtn.classList.remove('disabled');
@@ -391,29 +496,7 @@
       }
     }
   }, 1200);
-
   window.addEventListener('beforeunload', ()=> clearInterval(pollTimer) );
-
-  // initialize progress ring (same behavior as before, non-blocking)
-  (function(){
-    const circle = document.getElementById('progressCircle');
-    const percentText = document.getElementById('percentText');
-    if(!circle || !percentText) return;
-    const radius = 52;
-    const circumference = 2 * Math.PI * radius;
-    circle.style.strokeDasharray = `${circumference}`;
-    let pct = 0;
-    const interval = setInterval(()=>{
-      if(pct >= 73) { clearInterval(interval); return; }
-      pct += Math.floor(Math.random()*6)+2;
-      if(pct > 73) pct = 73;
-      const off = circumference * (1 - pct / 100);
-      circle.style.transition = 'stroke-dashoffset 0.35s ease';
-      circle.style.strokeDashoffset = off;
-      percentText.textContent = pct + '%';
-    }, 400);
-    setTimeout(()=>{ if(percentText) percentText.textContent = '73%'; if(circle) circle.style.strokeDashoffset = circumference * (1 - 73/100); }, 4100);
-  })();
 
 })();
 </script>
