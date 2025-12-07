@@ -295,8 +295,17 @@
   // timeframe page path (must match saved filename)
   const TIMEFRAME_PAGE = 'timeframe.html';
 
-  function openTimeframe(pairId){
-    const url = `${TIMEFRAME_PAGE}?pair=${encodeURIComponent(pairId)}`;
+  // extract flag code from flag image src (works with flagcdn urls like .../w40/gb.png)
+  function flagCodeFromImgSrc(src){
+    try {
+      const parts = src.split('/');
+      const file = parts[parts.length-1]; // e.g. gb.png or eu.png
+      return file.split('.')[0]; // gb
+    } catch(e){ return ''; }
+  }
+
+  function openTimeframe(pairId, flag1, flag2){
+    const url = `${TIMEFRAME_PAGE}?pair=${encodeURIComponent(pairId)}&flag1=${encodeURIComponent(flag1)}&flag2=${encodeURIComponent(flag2)}`;
     window.location.href = url;
   }
 
@@ -304,7 +313,12 @@
   document.querySelectorAll('.pair-card').forEach(card=>{
     card.addEventListener('click', function(){
       const pair = this.dataset.pair || 'EURUSD';
-      openTimeframe(pair);
+      // try to read the main flag and the mini-flag from the clicked card
+      const mainFlagImg = this.querySelector('.flag');
+      const miniFlagImg = this.querySelector('.mini-flag');
+      const flag1 = mainFlagImg ? flagCodeFromImgSrc(mainFlagImg.src) : '';
+      const flag2 = miniFlagImg ? flagCodeFromImgSrc(miniFlagImg.src) : '';
+      openTimeframe(pair, flag1 || '', flag2 || '');
     });
   });
 
@@ -348,7 +362,11 @@
         badgeC.appendChild(be);
       });
     }
-    div.addEventListener('click', ()=> openTimeframe(d.pair));
+    div.addEventListener('click', ()=> {
+      const flag1 = d.flag || '';
+      const flag2 = d.mini || '';
+      openTimeframe(d.pair, flag1, flag2);
+    });
     extraPairsEl.appendChild(div);
   });
 
