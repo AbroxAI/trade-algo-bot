@@ -22,7 +22,9 @@
 
   .card { background:#0a0d1d; border-radius:16px; border:1px solid #1a1f35; padding:16px; text-align:center; position:relative; }
 
-  .pair-title{ font-weight:800; font-size:16px; margin-bottom:6px; }
+  .pair-row { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:8px; }
+  .pair-flag { width:34px; height:24px; border-radius:6px; overflow:hidden; display:inline-block; border:1px solid rgba(255,255,255,0.03); box-shadow:0 8px 18px rgba(2,4,10,0.35); }
+  .pair-title{ font-weight:800; font-size:16px; margin-bottom:6px; display:flex; align-items:center; gap:8px; justify-content:center; }
   .pair-meta{ font-size:12px; color:#7a86a8; margin-bottom:12px; opacity:0.95 }
 
   /* progress ring */
@@ -57,9 +59,46 @@
 
   .disabled { opacity:0.55; pointer-events:none; }
 
+  /* SIGNAL CARD - TIKTOK STYLE */
+  .signal-card {
+    margin: 14px auto 6px;
+    width: 86%;
+    max-width:320px;
+    background: linear-gradient(180deg, rgba(22,12,48,0.9), rgba(12,8,30,0.72));
+    border-radius:16px;
+    padding: 18px;
+    border:1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 12px 30px rgba(40,18,140,0.14), inset 0 1px 0 rgba(255,255,255,0.02);
+    position:relative;
+  }
+  .arrow-wrap { height:120px; display:flex; align-items:center; justify-content:center; }
+  .arrow {
+    width:120px;
+    height:80px;
+    display:block;
+    filter: drop-shadow(0 6px 18px rgba(0,0,0,0.5));
+    transition: transform 500ms ease, opacity 300ms ease;
+    opacity:0;
+    transform: translateY(12px) scale(0.95);
+  }
+  .arrow.up { opacity:0; }
+  .signal-text {
+    text-align:center; margin-top:8px; font-weight:800; font-size:18px;
+  }
+  .signal-up { color:#34D399; } /* green */
+  .signal-down { color:#ff4d6d; } /* red */
+
+  /* small animation pulse */
+  .pulse {
+    position:absolute; right:12px; top:12px; width:64px; height:64px; border-radius:12px;
+    background: radial-gradient(circle at 20% 20%, rgba(90,60,255,0.14), transparent 30%);
+    box-shadow: 0 10px 30px rgba(90,60,255,0.08);
+  }
+
   @media (min-width:520px) {
     .modal .box { max-width:520px; }
   }
+
 </style>
 </head>
 <body>
@@ -68,15 +107,31 @@
     <div class="subtext">Pairs · Time · Signal</div>
 
     <div class="card" id="mainCard">
-      <div class="pair-title" id="pairTitle">EUR / USD (OTC)</div>
+      <div class="pair-row">
+        <div class="pair-flag" id="flag1Wrap"><img id="flag1Img" src="" alt="" style="width:100%;height:100%;object-fit:cover"></div>
+        <div class="pair-title" id="pairTitle">EUR / USD (OTC)</div>
+        <div class="pair-flag" id="flag2Wrap"><img id="flag2Img" src="" alt="" style="width:100%;height:100%;object-fit:cover"></div>
+      </div>
+
       <div class="pair-meta" id="pairMeta">Live Signal · 5s Frame</div>
 
-      <div class="ring" aria-hidden="true">
-        <svg width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="progress">
-          <circle cx="60" cy="60" r="52" stroke="#22263b" stroke-width="8" fill="none"></circle>
-          <circle id="progressCircle" cx="60" cy="60" r="52" stroke="#b06bff" stroke-width="8" stroke-linecap="round" fill="none" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
-        </svg>
-        <div class="percent" id="percentText">0%</div>
+      <!-- SIGNAL CARD -->
+      <div class="signal-card" aria-hidden="false" id="signalCard">
+        <div class="pulse" aria-hidden="true"></div>
+        <div class="arrow-wrap">
+          <!-- SVG arrows: we'll toggle visibility via classes -->
+          <svg id="arrowUp" class="arrow up" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 40 L40 15 L60 35 L90 5" stroke="#34D399" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            <path d="M88 7 L95 12 L82 14" stroke="#34D399" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          </svg>
+
+          <svg id="arrowDown" class="arrow down" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 10 L40 35 L60 15 L90 55" stroke="#ff4d6d" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            <path d="M88 53 L95 48 L82 46" stroke="#ff4d6d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          </svg>
+        </div>
+
+        <div id="signalText" class="signal-text"><span class="signal-up">Your signal: —</span></div>
       </div>
 
       <div style="margin-top:12px;color:#8a94ad;font-size:13px">Analyzing signal…</div>
@@ -94,7 +149,7 @@
     </div>
   </div>
 
-  <!-- subscription modal -->
+  <!-- subscription modal (kept unchanged) -->
   <div class="modal" id="subModal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="box" id="modalBox">
       <h3 id="modalTitle">Subscription Required</h3>
@@ -131,7 +186,21 @@
 
 <script>
 (function(){
-  // UI elements
+
+  // helper to read querystring
+  function qs(name){ return new URLSearchParams(location.search).get(name); }
+
+  // --- read incoming params (pair and flags forwarded from timeframe) ---
+  const rawPair = qs('pair') || 'EURUSD';
+  const tf = qs('tf') || '5s';
+  const flag1 = qs('flag1') || ''; // e.g. 'eu'
+  const flag2 = qs('flag2') || ''; // e.g. 'us'
+
+  // -- UI elements --
+  const pairTitleEl = document.getElementById('pairTitle');
+  const pairMetaEl = document.getElementById('pairMeta');
+  const flag1Img = document.getElementById('flag1Img');
+  const flag2Img = document.getElementById('flag2Img');
   const generateBtn = document.getElementById('generateBtn');
   const backBtn = document.getElementById('backBtn');
   const subModal = document.getElementById('subModal');
@@ -143,92 +212,142 @@
   const waitingBtn = document.getElementById('waitingBtn');
   const cancelPending = document.getElementById('cancelPending');
 
-  // helper to read querystring
-  function qs(name){
-    const u = new URLSearchParams(location.search);
-    return u.get(name);
+  const arrowUp = document.getElementById('arrowUp');
+  const arrowDown = document.getElementById('arrowDown');
+  const signalText = document.getElementById('signalText');
+
+  // --- utility: flag url builder using flagcdn style ---
+  function flagUrl(code, size){
+    if(!code) return '';
+    // flagcdn uses 2-letter country codes; your pair uses codes above (eu, gb, us, jp etc)
+    // we use the same pattern seen in index.html: https://flagcdn.com/w40/xx.png
+    return `https://flagcdn.com/w${size}/${code}.png`;
   }
 
-  // Read pair and timeframe from URL and apply to UI
-  function applyParamsToUI(){
-    const rawPair = qs('pair') || 'EURUSD';
-    const tf = qs('tf') || '5s';
-
-    // Format pair display: "EUR / USD (OTC)" when pair has 6 chars like EURUSD
-    let formatted = rawPair;
-    if(rawPair.length === 6){
-      const a = rawPair.slice(0,3);
-      const b = rawPair.slice(3);
-      formatted = `${a} / ${b}`;
+  // --- format pair (EURUSD -> EUR / USD) ---
+  function formatPair(p){
+    if(!p) return p;
+    if(p.length === 6){
+      return p.slice(0,3) + ' / ' + p.slice(3);
     }
-    // If user cares about showing OTC or not, keep "(OTC)" if pair has 'OTC' in badges - we keep current "(OTC)" for visual parity only.
-    document.getElementById('pairTitle').textContent = `${formatted} (OTC)`;
-    document.getElementById('pairMeta').textContent = `Live Signal · ${tf} Frame`;
+    return p;
   }
 
-  // If bot returns user with ?verified=1 we mark verified in localStorage.
-  if(qs('verified') === '1'){
-    try {
-      localStorage.setItem('tradealgo_verified','1');
-      // clean URL (remove query)
-      const url = new URL(location.href);
-      url.searchParams.delete('verified');
-      history.replaceState({}, document.title, url.toString());
-      // feedback
-      alert('Verification successful — signals unlocked.');
-    } catch(e){}
+  // --- apply incoming params to UI ---
+  pairTitleEl.textContent = `${formatPair(rawPair)} (OTC)`;
+  pairMetaEl.textContent = `Live Signal · ${tf} Frame`;
+
+  // set flags if provided (fallback to hidden if not)
+  if(flag1){
+    flag1Img.src = flagUrl(flag1,40);
+    flag1Img.alt = flag1;
+    document.getElementById('flag1Wrap').style.display = 'inline-block';
+  } else {
+    document.getElementById('flag1Wrap').style.display = 'none';
+  }
+  if(flag2){
+    flag2Img.src = flagUrl(flag2,40);
+    flag2Img.alt = flag2;
+    document.getElementById('flag2Wrap').style.display = 'inline-block';
+  } else {
+    document.getElementById('flag2Wrap').style.display = 'none';
   }
 
-  // Main check: if verified -> enable generate button
+  // --- Admin override: only admin can generate signals without subscription ---
+  // To enable locally: in browser console run:
+  // localStorage.setItem('tradealgo_admin','1')
+  // OR open dashboard.html?admin=1 once.
+  function isAdmin(){
+    if(qs('admin') === '1') {
+      try { localStorage.setItem('tradealgo_admin','1'); } catch(e) {}
+      return true;
+    }
+    return localStorage.getItem('tradealgo_admin') === '1';
+  }
+
+  // Verified subscription check (your existing flow)
   function isVerified(){
     return localStorage.getItem('tradealgo_verified') === '1';
   }
 
+  // preserve existing pending/subscribed flow
   function isPending(){
     return localStorage.getItem('tradealgo_subscribed') === 'pending';
   }
 
-  function applyVerifiedState(){
-    if(isVerified()){
-      generateBtn.disabled = false;
-      generateBtn.textContent = '⚡ Generate New Signal';
-      generateBtn.classList.remove('disabled');
+  // When admin — bypass modal and allow generating
+  function canGenerate(){
+    return isAdmin() || isVerified();
+  }
+
+  // --- SIGNAL GENERATION: animate arrow and show up/down text inside the dashboard ---
+  function showSignal(direction){
+    // hide both first
+    arrowUp.style.opacity = 0; arrowUp.style.transform = 'translateY(12px) scale(0.95)';
+    arrowDown.style.opacity = 0; arrowDown.style.transform = 'translateY(12px) scale(0.95)';
+    signalText.innerHTML = '';
+
+    if(direction === 'UP'){
+      arrowUp.style.opacity = 1; arrowUp.style.transform = 'translateY(0px) scale(1)';
+      signalText.innerHTML = `<span class="signal-up">Your signal: UP</span>`;
     } else {
-      // start locked
-      generateBtn.disabled = false;
-      generateBtn.textContent = '⚡ Generate New Signal';
+      arrowDown.style.opacity = 1; arrowDown.style.transform = 'translateY(0px) scale(1)';
+      signalText.innerHTML = `<span class="signal-down">Your signal: DOWN</span>`;
+    }
+
+    // small auto-reset after a while (keeps it visible for 4s)
+    setTimeout(()=>{
+      arrowUp.style.opacity = 0; arrowUp.style.transform = 'translateY(12px) scale(0.95)';
+      arrowDown.style.opacity = 0; arrowDown.style.transform = 'translateY(12px) scale(0.95)';
+      signalText.innerHTML = `<span class="signal-up">Your signal: —</span>`;
+    }, 4000);
+  }
+
+  // Fake signal decision (simple RNG + ensure repeatable feel)
+  function generateSignalDecision(){
+    // deterministic-ish using current seconds and pair to add variety
+    try {
+      const seed = (new Date()).getSeconds() + rawPair.length;
+      const r = (seed * 9301 + 49297) % 233280;
+      return (r % 2 === 0) ? 'UP' : 'DOWN';
+    } catch(e){
+      return (Math.random() > 0.5) ? 'UP' : 'DOWN';
     }
   }
 
-  // initial UI
-  applyParamsToUI();
-  applyVerifiedState();
+  // apply initial UI state
+  if(isVerified() || isAdmin()){
+    // if verified/admin, do nothing special — Generate will work normally
+  } else {
+    // for non-verified users we keep normal UI (Generate opens modal)
+  }
 
-  // Clicking back goes to index/pairs page
-  backBtn.addEventListener('click', ()=> {
-    // canonical file name used by the project
-    window.location.href = 'index.html';
-  });
-
-  // "Generate" behaviour
-  generateBtn.addEventListener('click', ()=> {
-    if(isVerified()){
-      // real signal generation path
-      generateBtn.textContent = 'Generating...';
+  // Generate button behavior
+  generateBtn.addEventListener('click', ()=>{
+    if(canGenerate()){
+      // admin or verified -> generate and animate inside dashboard
       generateBtn.disabled = true;
+      generateBtn.textContent = 'Generating...';
       setTimeout(()=>{
+        const decision = generateSignalDecision();
+        showSignal(decision);
         generateBtn.textContent = '⚡ Generate New Signal';
         generateBtn.disabled = false;
-        alert('Signal generated: BUY 0.5 lot on ' + document.getElementById('pairTitle').textContent);
-      }, 1200);
+        // optionally store last generated signal locally (for debug)
+        try { localStorage.setItem('tradealgo_last_signal', JSON.stringify({pair:rawPair,tf:tf,signal:decision,ts:Date.now()})); } catch(e){}
+      }, 900);
       return;
     }
 
-    // Not verified -> show modal subscription flow
+    // Not verified & not admin -> show subscription modal
     openSubscriptionModal();
   });
 
-  // Open modal and show initial subscribe prompt
+  // Back button
+  backBtn.addEventListener('click', ()=> { window.location.href = 'index.html'; });
+
+  // Existing subscription modal logic (kept mostly intact)
+  // I Subscribed clicked -> switch to pending UI (no unlock)
   function openSubscriptionModal(){
     subModal.style.display = 'flex';
     subModal.setAttribute('aria-hidden','false');
@@ -238,24 +357,15 @@
     waitingBtn.classList.add('disabled');
   }
 
-  // I Subscribed clicked -> switch to pending UI (no unlock)
   iSubBtn.addEventListener('click', ()=>{
-    // mark pending (demo). Real verification is done in Telegram.
     try { localStorage.setItem('tradealgo_subscribed','pending'); } catch(e){}
     modalActions.style.display = 'none';
     pendingArea.style.display = 'block';
     waitingBtn.classList.add('disabled');
-    // open telegram in new tab as convenience
-    // (tgLink already opens new tab). Keep this non-automatic per user agent rules.
   });
 
-  // second telegram button in pending area
-  tgLink2.addEventListener('click', ()=>{
-    // open chat in a new tab/window
-    window.open('https://t.me/Trade_Algo_Robot?start=tradealgo_sub','_blank','noopener');
-  });
+  tgLink2.addEventListener('click', ()=>{ window.open('https://t.me/Trade_Algo_Robot?start=tradealgo_sub','_blank','noopener'); });
 
-  // Cancel pending resets state and closes modal
   cancelPending.addEventListener('click', ()=>{
     try { localStorage.removeItem('tradealgo_subscribed'); } catch(e){}
     pendingArea.style.display = 'none';
@@ -264,7 +374,6 @@
     subModal.setAttribute('aria-hidden','true');
   });
 
-  // Close modal on background click
   subModal.addEventListener('click', (e)=>{
     if(e.target === subModal){
       subModal.style.display = 'none';
@@ -275,24 +384,21 @@
   // Poll for verification state in localStorage so page can update if bot marks user verified.
   let pollTimer = setInterval(()=>{
     if(isVerified()){
-      // unlock UI
       waitingBtn.classList.remove('disabled');
       waitingBtn.textContent = 'Verified — Ready';
-      // hide modal automatically if open
       if(subModal.style.display === 'flex'){
         setTimeout(()=>{ subModal.style.display='none'; subModal.setAttribute('aria-hidden','true'); }, 700);
       }
     }
-    applyVerifiedState();
   }, 1200);
 
-  // Clean up on unload
   window.addEventListener('beforeunload', ()=> clearInterval(pollTimer) );
 
-  // Progress ring animation (simulated)
+  // initialize progress ring (same behavior as before, non-blocking)
   (function(){
     const circle = document.getElementById('progressCircle');
     const percentText = document.getElementById('percentText');
+    if(!circle || !percentText) return;
     const radius = 52;
     const circumference = 2 * Math.PI * radius;
     circle.style.strokeDasharray = `${circumference}`;
@@ -306,7 +412,7 @@
       circle.style.strokeDashoffset = off;
       percentText.textContent = pct + '%';
     }, 400);
-    setTimeout(()=>{ percentText.textContent = '73%'; circle.style.strokeDashoffset = circumference * (1 - 73/100); }, 4100);
+    setTimeout(()=>{ if(percentText) percentText.textContent = '73%'; if(circle) circle.style.strokeDashoffset = circumference * (1 - 73/100); }, 4100);
   })();
 
 })();
