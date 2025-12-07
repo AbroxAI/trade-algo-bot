@@ -14,7 +14,7 @@
     min-height:100vh;
     display:flex;align-items:center;justify-content:center;padding:10px;
   }
-  .app{ width:100%; max-width:420px; background: linear-gradient(180deg, rgba(6,12,28,0.98), rgba(9,10,20,0.99)); border-radius:18px; box-shadow:0 30px 60px rgba(2,3,10,0.7); padding:18px; border:1px solid rgba(255,255,255,0.02); }
+  .app{ width:100%; max-width:420px; background: linear-gradient(180deg, rgba(6,12,28,0.98), rgba(9,10,20,0.99)); border-radius:18px; box-shadow:0 30px 60px rgba(2,3,10,0.7); padding:18px; border:1px solid rgba(255,255,255,0.02); position:relative; }
 
   .heading { text-align:center; font-weight:700; font-size:16px; margin-bottom:10px; color:#fff;}
   .subtext{ text-align:center;color:rgba(230,238,248,0.65); font-size:12px; margin-bottom:14px; }
@@ -45,8 +45,8 @@
     position:absolute;
     left:50%; top:170px;
     transform:translateX(-50%);
-    width:120px;
-    height:72px;
+    width:160px;
+    height:96px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -55,6 +55,29 @@
     transition: opacity 360ms ease, transform 560ms cubic-bezier(.2,.9,.36,1);
   }
   .arrow-overlay.show { opacity:1; transform:translateX(-50%) translateY(-6px); }
+
+  /* glow effects for arrows and text */
+  .arrow-up svg path { filter: drop-shadow(0 6px 14px rgba(52,211,153,0.18)); }
+  .arrow-down svg path { filter: drop-shadow(0 6px 14px rgba(255,77,109,0.18)); }
+  .signal-badge {
+    margin-top:6px;
+    font-weight:900;
+    letter-spacing:0.6px;
+    font-size:14px;
+    padding:6px 10px;
+    border-radius:999px;
+    display:inline-block;
+    color:#062216;
+    background:linear-gradient(90deg,#78f3b5,#3de1a3);
+    box-shadow:0 10px 30px rgba(60,200,150,0.18), inset 0 -2px 6px rgba(255,255,255,0.06);
+    opacity:0;
+    transform:translateY(6px);
+    transition: opacity 240ms ease, transform 260ms cubic-bezier(.2,.9,.36,1);
+    pointer-events:none;
+  }
+  .signal-badge.down { background:linear-gradient(90deg,#ff9fb0,#ff6b85); color:#2b0410; box-shadow:0 10px 30px rgba(255,90,110,0.14); }
+
+  .arrow-overlay.show .signal-badge { opacity:1; transform:translateY(0); }
 
   /* admin debug panel */
   .admin-panel{
@@ -72,6 +95,32 @@
   .admin-row:last-child { border-bottom:0 }
   .admin-key { color:#9aa4bd; font-weight:700; }
   .admin-val { color:#fff; font-weight:800; }
+
+  /* toggle (top-right) */
+  .admin-toggle {
+    position:absolute;
+    right:14px;
+    top:14px;
+    display:flex;
+    gap:8px;
+    align-items:center;
+    background: rgba(255,255,255,0.02);
+    padding:8px 10px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.02);
+    box-shadow: 0 8px 18px rgba(2,4,10,0.45);
+    z-index:20;
+    font-weight:800;
+    color:#dfe7ff;
+    font-size:13px;
+  }
+  .toggle-switch {
+    width:46px; height:26px; border-radius:999px; background:rgba(255,255,255,0.04); padding:3px; cursor:pointer; position:relative;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  }
+  .toggle-dot { width:20px; height:20px; border-radius:50%; background:#101216; position:absolute; left:3px; top:3px; transition:left 200ms cubic-bezier(.2,.9,.36,1), background 200ms; box-shadow:0 6px 12px rgba(0,0,0,0.6); }
+  .toggle-switch.on { background: linear-gradient(90deg,#34D399,#10B981); }
+  .toggle-switch.on .toggle-dot { left:23px; background:#ffffff; }
 
   /* modal */
   .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter: blur(4px); justify-content:center; align-items:center; z-index:9999; }
@@ -91,9 +140,17 @@
 </style>
 </head>
 <body>
-  <div class="app" role="application" aria-label="Trading signal app">
+  <div class="app" role="application" aria-label="Trading signal app" id="appRoot">
     <div class="heading">Advanced Trading Signals</div>
     <div class="subtext">Pairs · Time · Signal</div>
+
+    <!-- Admin toggle (only injected/shown for admins) -->
+    <div id="adminToggle" class="admin-toggle" style="display:none" title="Admin features toggle">
+      <div style="font-size:12px;color:#9aa4bd">Admin</div>
+      <div id="toggleSwitch" class="toggle-switch" role="switch" aria-checked="true" tabindex="0">
+        <div class="toggle-dot"></div>
+      </div>
+    </div>
 
     <div class="card" id="mainCard">
       <div class="pair-row">
@@ -106,7 +163,7 @@
       </div>
 
       <!-- the exact ring SVG -->
-      <div class="ring" role="img" aria-label="confidence ring">
+      <div class="ring" role="img" aria-label="confidence ring" id="ringWrap">
         <svg width="120" height="120" viewBox="0 0 120 120" aria-hidden="true">
           <circle cx="60" cy="60" r="52" stroke="#22263b" stroke-width="8" fill="none"></circle>
           <circle id="progressCircle" cx="60" cy="60" r="52" stroke="#b06bff" stroke-width="8" stroke-linecap="round" fill="none"
@@ -127,20 +184,21 @@
 
       <div class="powered">Powered by Advanced AI</div>
 
-      <!-- arrow overlay shown only for admin -->
+      <!-- arrow overlay shown only when admin features enabled -->
       <div class="arrow-overlay" id="arrowOverlay" aria-hidden="true">
         <div class="arrow-up" id="arrowUp" style="display:none">
-          <svg viewBox="0 0 100 60" width="120" height="72" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 100 60" width="160" height="96" xmlns="http://www.w3.org/2000/svg">
             <path d="M10 40 L40 15 L60 35 L90 5" stroke="#34D399" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
             <path d="M88 7 L95 12 L82 14" stroke="#34D399" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
           </svg>
         </div>
         <div class="arrow-down" id="arrowDown" style="display:none">
-          <svg viewBox="0 0 100 60" width="120" height="72" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 100 60" width="160" height="96" xmlns="http://www.w3.org/2000/svg">
             <path d="M10 10 L40 35 L60 15 L90 55" stroke="#ff4d6d" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
             <path d="M88 53 L95 48 L82 46" stroke="#ff4d6d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
           </svg>
         </div>
+        <div id="signalBadge" class="signal-badge" aria-hidden="true">YOUR SIGNAL IS UP</div>
       </div>
 
       <!-- admin debug hidden by default -->
@@ -218,12 +276,16 @@
   const arrowOverlay = document.getElementById('arrowOverlay');
   const arrowUp = document.getElementById('arrowUp');
   const arrowDown = document.getElementById('arrowDown');
+  const signalBadge = document.getElementById('signalBadge');
 
   const adminPanel = document.getElementById('adminPanel');
   const admSignal = document.getElementById('admSignal');
   const admConfidence = document.getElementById('admConfidence');
   const admStrength = document.getElementById('admStrength');
   const admIndicators = document.getElementById('admIndicators');
+
+  const adminToggle = document.getElementById('adminToggle');
+  const toggleSwitch = document.getElementById('toggleSwitch');
 
   function flagUrl(code,size){ if(!code) return ''; return `https://flagcdn.com/w${size}/${code}.png`; }
   function formatPair(p){ return (p && p.length===6) ? p.slice(0,3) + ' / ' + p.slice(3) : p; }
@@ -243,7 +305,47 @@
     return localStorage.getItem('tradealgo_admin') === '1';
   }
 
-  function isVerified(){ return localStorage.getItem('tradealgo_verified') === '1'; }
+  // admin features enabled flag (toggle) stored separately
+  function adminFeaturesEnabled(){
+    // default true for admins when first time
+    const v = localStorage.getItem('tradealgo_admin_features');
+    if(v === null) return true;
+    return v === '1';
+  }
+  function setAdminFeaturesEnabled(on){
+    try { localStorage.setItem('tradealgo_admin_features', on ? '1' : '0'); } catch(e){}
+    updateToggleUI();
+    updateAdminFeatureVisibility();
+  }
+
+  // visible behavior for admin vs users
+  function updateAdminFeatureVisibility(){
+    const isAdm = isAdmin();
+    const admOn = adminFeaturesEnabled();
+    // show/hide toggle (admins only)
+    adminToggle.style.display = isAdm ? 'flex' : 'none';
+    // debug panel only when admin & features enabled
+    adminPanel.style.display = (isAdm && admOn) ? 'block' : 'none';
+    // arrow overlay only when features enabled (arrow will show when triggered)
+    arrowOverlay.style.visibility = (isAdm && admOn) ? 'visible' : 'hidden';
+    // when admin features disabled, make generate button behave like normal user (show modal)
+    if(!admOn) {
+      // make sure arrow hidden
+      arrowOverlay.classList.remove('show');
+    }
+  }
+
+  // update the visual state of the toggle
+  function updateToggleUI(){
+    const on = adminFeaturesEnabled();
+    if(on){
+      toggleSwitch.classList.add('on');
+      toggleSwitch.setAttribute('aria-checked','true');
+    } else {
+      toggleSwitch.classList.remove('on');
+      toggleSwitch.setAttribute('aria-checked','false');
+    }
+  }
 
   // seeded pseudo-random generator (repeatable-ish)
   function seeded(seedString){
@@ -311,8 +413,11 @@
     const radius = 52;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference * (1 - pct/100);
-    progressCircle.style.transition = 'stroke-dashoffset 700ms cubic-bezier(.2,.9,.36,1)';
-    progressCircle.style.strokeDashoffset = offset;
+    const circle = document.getElementById('progressCircle');
+    if(circle){
+      circle.style.transition = 'stroke-dashoffset 700ms cubic-bezier(.2,.9,.36,1)';
+      circle.style.strokeDashoffset = offset;
+    }
     ringPercent.textContent = pct + '%';
   }
 
@@ -322,17 +427,31 @@
     return scoreComposite >= 0 ? 'UP' : 'DOWN';
   }
 
-  // show arrow overlay
+  // show arrow overlay and badge
   function showArrow(direction){
     arrowUp.style.display = 'none'; arrowDown.style.display = 'none';
-    if(direction === 'UP') arrowUp.style.display = 'block'; else arrowDown.style.display = 'block';
+    signalBadge.classList.remove('down');
+    if(direction === 'UP') {
+      arrowUp.style.display = 'block';
+      signalBadge.textContent = 'YOUR SIGNAL IS UP';
+      signalBadge.classList.remove('down');
+    } else {
+      arrowDown.style.display = 'block';
+      signalBadge.textContent = 'YOUR SIGNAL IS DOWN';
+      signalBadge.classList.add('down');
+    }
+    // show overlay then hide after a while
     arrowOverlay.classList.add('show');
-    setTimeout(()=> arrowOverlay.classList.remove('show'), 5000);
+    arrowOverlay.setAttribute('aria-hidden','false');
+    setTimeout(()=> {
+      arrowOverlay.classList.remove('show');
+      arrowOverlay.setAttribute('aria-hidden','true');
+    }, 5000);
   }
 
   // render admin debug
   function renderAdminDebug(out){
-    if(!isAdmin()) return;
+    if(!isAdmin() || !adminFeaturesEnabled()) return;
     adminPanel.style.display = 'block';
     admSignal.textContent = out.finalSignal;
     admConfidence.textContent = out.confidence + '%';
@@ -351,9 +470,12 @@
   renderIndicatorChips(initial.indicators);
   setRingPercent(initial.confidence);
 
-  // handle generate
+  // generate behavior
   generateBtn.addEventListener('click', ()=>{
-    if(isAdmin()){
+    const isAdm = isAdmin();
+    const admOn = adminFeaturesEnabled();
+    if(isAdm && admOn){
+      // admin + features enabled: full signal generation
       generateBtn.disabled = true;
       generateBtn.textContent = 'Generating...';
       setTimeout(()=>{
@@ -369,7 +491,8 @@
       }, 900);
       return;
     }
-    // normal users -> subscription modal
+
+    // all other cases -> subscription modal (user or admin with toggle OFF)
     subModal.style.display = 'flex';
     subModal.setAttribute('aria-hidden','false');
   });
@@ -394,15 +517,39 @@
 
   subModal.addEventListener('click', (e)=>{ if(e.target === subModal){ subModal.style.display = 'none'; subModal.setAttribute('aria-hidden','true'); } });
 
+  // toggle events (keyboard + click)
+  function toggleClick(){
+    const isOn = adminFeaturesEnabled();
+    setAdminFeaturesEnabled(!isOn);
+  }
+  toggleSwitch.addEventListener('click', toggleClick);
+  toggleSwitch.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleClick(); } });
+
+  // init admin UI
+  updateToggleUI();
+  updateAdminFeatureVisibility();
+
+  // if admin param present, set admin persistent flag
+  if(qs('admin') === '1') {
+    try { localStorage.setItem('tradealgo_admin','1'); } catch(e){}
+    // ensure admin features default to enabled if first time
+    if(localStorage.getItem('tradealgo_admin_features') === null) setAdminFeaturesEnabled(true);
+  }
+
+  // show toggle only to admins
   if(isAdmin()){
-    renderAdminDebug({ finalSignal:'—', confidence:initial.confidence, strength:initial.score, indicators: initial.indicators });
+    adminToggle.style.display = 'flex';
+    updateToggleUI();
+    updateAdminFeatureVisibility();
   } else {
+    adminToggle.style.display = 'none';
     adminPanel.style.display = 'none';
+    arrowOverlay.style.visibility = 'hidden';
   }
 
   // poll for verified (keeps existing behavior)
   let pollTimer = setInterval(()=>{
-    if(isVerified()){
+    if(localStorage.getItem('tradealgo_verified') === '1'){
       waitingBtn.classList.remove('disabled');
       waitingBtn.textContent = 'Verified — Ready';
       if(subModal.style.display === 'flex'){
