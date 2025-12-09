@@ -3,114 +3,99 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trade Signal</title>
+<title>Signal</title>
 
 <style>
     body {
         margin: 0;
-        background: #0d0f2a;
-        font-family: Poppins, sans-serif;
+        background: #060718;
+        font-family: -apple-system, Inter, sans-serif;
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding-top: 30px;
-        color: #fff;
+        padding-top: 25px;
+        color: white;
     }
 
-    /* Top Info Row */
-    .info-row {
-        text-align: center;
-        margin-bottom: 10px;
-    }
-
-    .pair-name {
-        font-size: 20px;
-        font-weight: 600;
+    /* HEADER */
+    .pair {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 4px;
     }
 
     .tf {
-        font-size: 14px;
-        opacity: 0.8;
+        font-size: 12px;
+        opacity: 0.7;
+        margin-bottom: 18px;
     }
 
-    /* Card UI (Replica of Video) */
+    /* CARD (NO RING, NO EFFECTS, CLEAN LIKE VIDEO) */
     .signal-box {
         width: 260px;
         height: 260px;
-        background: #1b1e3b;
-        border-radius: 18px;
+        background: #0a0d1d;
+        border-radius: 20px;
         display: flex;
         justify-content: center;
         align-items: center;
         position: relative;
-        box-shadow: 0px 0px 20px rgba(0,0,0,0.35);
-        margin-bottom: 15px;
+        border: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* Arrow container */
+    /* PURE ARROW ONLY — no glow, no shadows */
     .arrow {
-        width: 90px;
-        height: 90px;
-        border-right: 12px solid #00ff57;
-        border-bottom: 12px solid #00ff57;
+        width: 95px;
+        height: 95px;
+        border-right: 14px solid #00ff57;
+        border-bottom: 14px solid #00ff57;
         transform: rotate(-45deg);
         border-radius: 4px;
     }
 
-    /* DOWN arrow */
-    .down {
+    .arrow.down {
         transform: rotate(135deg);
     }
 
-    /* Signal text */
     .signal-text {
-        margin-top: 10px;
+        margin-top: 15px;
         font-size: 18px;
-        font-weight: 600;
         color: #ff3b3b;
-        text-align: center;
+        font-weight: 700;
     }
 
-    /* Active indicators */
-    .tag {
-        margin-top: 10px;
-        background: #2a2d52;
-        border-radius: 30px;
-        padding: 6px 12px;
-        font-size: 13px;
+    .chip {
+        margin-top: 12px;
+        padding: 6px 14px;
+        background: #14172b;
+        border-radius: 20px;
+        font-size: 12px;
     }
 
     /* Buttons */
-    button {
+    .btn {
         width: 260px;
-        margin-top: 16px;
-        padding: 12px;
-        border-radius: 10px;
+        margin-top: 18px;
+        padding: 13px;
+        border-radius: 12px;
         border: none;
-        background: linear-gradient(90deg, #6a5dfc, #8f6dfd);
+        background: linear-gradient(90deg,#6b5bff,#8a6ffd);
         color: white;
-        font-size: 16px;
-        font-weight: 600;
+        font-size: 15px;
+        font-weight: 700;
         cursor: pointer;
-        transition: 0.25s;
     }
 
-    button:hover {
-        opacity: 0.8;
-    }
-
-    .back-btn {
-        background: #24273f;
-        margin-top: 10px;
+    .back {
+        background: #191b2d;
+        margin-top: 12px;
     }
 </style>
 </head>
 <body>
 
-<div class="info-row">
-    <div class="pair-name" id="pairLabel">EUR / USD</div>
-    <div class="tf" id="tfLabel">60s Timeframe</div>
-</div>
+<div class="pair" id="pairName">EUR / USD</div>
+<div class="tf" id="tfLabel">60s timeframe</div>
 
 <div class="signal-box">
     <div id="arrow" class="arrow"></div>
@@ -118,31 +103,31 @@
 
 <div id="signalText" class="signal-text">Your signal: UP</div>
 
-<div class="tag">Base Analysis</div>
+<div class="chip">Base Analysis</div>
 
-<button id="generateBtn">Generate New Signal</button>
-
-<button class="back-btn" onclick="window.location.href='dashboard.html'">⬅ Back to Pairs</button>
+<button id="gen" class="btn">Generate New Signal</button>
+<button class="btn back" onclick="window.location.href='dashboard.html'">← Back to pairs</button>
 
 <script>
-    // Extract URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const pair = urlParams.get("pair") || "EUR/USD";
-    const tf = urlParams.get("tf") || "60s";
+    const params = new URLSearchParams(window.location.search);
+    const pair = params.get("pair") || "EUR/USD";
+    const tf = params.get("tf") || "60s";
 
-    document.getElementById("pairLabel").innerText = pair.replace("/", " / ");
-    document.getElementById("tfLabel").innerText = tf + " Timeframe";
+    document.getElementById("pairName").innerText = pair.replace("/", " / ");
+    document.getElementById("tfLabel").innerText = tf + " timeframe";
 
-    // Generate Signal Logic
-    document.getElementById("generateBtn").addEventListener("click", () => {
-        const signal = Math.random() > 0.5 ? "UP" : "DOWN";
-
-        // Apply correct arrow
+    document.getElementById("gen").addEventListener("click", () => {
+        const up = Math.random() > 0.5;
         const arrow = document.getElementById("arrow");
-        arrow.className = signal === "UP" ? "arrow" : "arrow down";
+        const txt = document.getElementById("signalText");
 
-        // Set text
-        document.getElementById("signalText").innerText = "Your signal: " + signal;
+        if (up) {
+            arrow.className = "arrow";
+            txt.innerText = "Your signal: UP";
+        } else {
+            arrow.className = "arrow down";
+            txt.innerText = "Your signal: DOWN";
+        }
     });
 </script>
 
