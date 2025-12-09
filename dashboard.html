@@ -2,20 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Trade Algo Bot — Dashboard</title>
 <style>
-  /* --- Reset & base --- */
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    font-family: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background: linear-gradient(180deg,#060718 0%, #040417 45%, #02030a 100%);
     color:#e6eef8;
     min-height:100vh;
     display:flex;align-items:center;justify-content:center;padding:12px;
   }
-
   .app{ width:100%; max-width:520px; background: linear-gradient(180deg, rgba(6,12,28,0.98), rgba(9,10,20,0.99)); border-radius:18px; box-shadow:0 30px 60px rgba(2,3,10,0.7); padding:18px; border:1px solid rgba(255,255,255,0.02); position:relative; }
 
   .heading { text-align:center; font-weight:800; font-size:16px; margin-bottom:8px; color:#fff;}
@@ -24,11 +22,11 @@
   .card { background:#0a0d1d; border-radius:16px; border:1px solid #1a1f35; padding:16px; text-align:center; position:relative; }
 
   .pair-row { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:8px; }
-  .pair-flag { width:36px; height:26px; border-radius:6px; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:11px; }
+  .pair-flag { width:36px; height:26px; border-radius:6px; overflow:hidden; display:inline-block; border:1px solid rgba(255,255,255,0.03); box-shadow:0 8px 18px rgba(2,4,10,0.35); }
   .pair-title{ font-weight:800; font-size:16px; margin-bottom:4px; display:flex; align-items:center; gap:8px; justify-content:center; color:#f3f6fb }
   .pair-meta{ font-size:12px; color:#7a86a8; margin-bottom:12px; opacity:0.95 }
 
-  /* ring */
+  /* progress ring */
   .ring { width:132px;height:132px;border-radius:50%;margin:6px auto 8px;display:flex;align-items:center;justify-content:center; position:relative; }
   .ring .percent{ font-weight:800; font-size:20px; color:#b06bff; z-index:3; text-shadow:0 2px 8px rgba(176,107,255,0.15) }
   .ring svg{ position:absolute; left:0; top:0; transform:rotate(-90deg); }
@@ -42,7 +40,7 @@
 
   .powered{ text-align:center; font-size:11px; color:#5b6280; margin-top:10px; }
 
-  /* arrow overlay & halo */
+  /* arrow overlay (admin-only) */
   .arrow-overlay {
     position:absolute;
     left:50%;
@@ -60,9 +58,27 @@
   }
   .arrow-overlay.show { opacity:1; transform:translateX(-50%) translateY(-8px); }
 
+  .signal-label {
+    margin-top:8px;
+    font-weight:900;
+    font-size:14px;
+    padding:6px 12px;
+    border-radius:999px;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    box-shadow: 0 8px 36px rgba(0,0,0,0.45);
+    opacity:0;
+    transform:translateY(6px);
+    transition: opacity 260ms ease, transform 360ms cubic-bezier(.2,.9,.36,1);
+    z-index:7;
+    pointer-events:none;
+  }
+  .signal-label.show { opacity:1; transform:translateY(0); }
+  .signal-up { background: linear-gradient(90deg,#0f7f4a,#34d399); color: #032614; }
+  .signal-down { background: linear-gradient(90deg,#ff6b7a,#ff4d6d); color: #3a0610; }
+
   .glow-halo {
     position:absolute;
-    inset:auto;
     width:220px;
     height:120px;
     left:50%;
@@ -81,73 +97,49 @@
   @keyframes haloUp { 0%{transform:translateX(-50%) scale(0.9); opacity:0} 20%{opacity:0.9; transform:translateX(-50%) scale(1.06)} 100%{opacity:0.12; transform:translateX(-50%) scale(1.12)} }
   @keyframes haloDown { 0%{transform:translateX(-50%) scale(0.9); opacity:0} 20%{opacity:0.9; transform:translateX(-50%) scale(1.06)} 100%{opacity:0.12; transform:translateX(-50%) scale(1.12)} }
 
-  /* signal label */
-  .signal-label {
-    margin-top:8px;
-    font-weight:900;
-    font-size:14px;
-    padding:6px 12px;
-    border-radius:999px;
-    text-transform:uppercase;
-    letter-spacing:0.6px;
-    box-shadow: 0 8px 36px rgba(0,0,0,0.45);
-    opacity:0;
-    transform:translateY(6px);
-    transition: opacity 260ms ease, transform 360ms cubic-bezier(.2,.9,.36,1);
-    z-index:7;
-    pointer-events:none;
-  }
-  .signal-label.show { opacity:1; transform:translateY(0); }
-  .signal-up { background: linear-gradient(90deg,#0f7f4a,#34d399); color: #032614; text-shadow: 0 2px 8px rgba(52,211,153,0.12);}
-  .signal-down { background: linear-gradient(90deg,#ff6b7a,#ff4d6d); color: #3a0610; text-shadow: 0 2px 8px rgba(255,77,109,0.12); }
+  .admin-panel{ margin-top:14px;background: linear-gradient(180deg,#071028,#061022);border-radius:12px;padding:12px;text-align:left;font-size:13px;color:#c8d2e6;border:1px solid rgba(255,255,255,0.02); box-shadow: 0 8px 30px rgba(2,3,12,0.6); }
+  .admin-row{ display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,0.02);}
+  .admin-key { color:#9aa4bd; font-weight:700; }
+  .admin-val { color:#fff; font-weight:800; }
 
-  /* admin panel */
-  .admin-panel{ margin-top:14px; background: linear-gradient(180deg,#071028,#061022); border-radius:12px; padding:12px; text-align:left; font-size:13px; color:#c8d2e6; border:1px solid rgba(255,255,255,0.02); box-shadow: 0 8px 30px rgba(2,3,12,0.6);}
-  .admin-row{ display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,0.02); }
-  .admin-row:last-child{ border-bottom:0; }
-  .admin-key{ color:#9aa4bd; font-weight:700; }
-  .admin-val{ color:#fff; font-weight:800; }
-
-  /* toggle */
   .admin-controls{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:10px; }
   .toggle { display:inline-flex; align-items:center; gap:8px; }
-  .switch { width:46px; height:26px; border-radius:999px; background:#10121b; position:relative; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
-  .switch .knob{ position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:999px; background:#e6eef8; transition:left 180ms; box-shadow:0 6px 18px rgba(2,3,10,0.6); }
-  .switch.on{ background: linear-gradient(90deg,#34d399,#0f7f4a); }
+  .toggle .switch { width:46px; height:26px; border-radius:999px; background:#10121b; position:relative; border:1px solid rgba(255,255,255,0.03); cursor:pointer;}
+  .switch .knob { position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:999px; background:#e6eef8; transition: left 180ms; }
+  .switch.on { background: linear-gradient(90deg,#34d399,#0f7f4a); }
   .switch.on .knob{ left:23px; background:#04241a; }
 
-  /* modal */
-  .modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter: blur(4px); justify-content:center; align-items:center; z-index:9999; }
+  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter: blur(4px); justify-content:center; align-items:center; z-index:9999; }
   .modal .box{ background:#0b0f1e; color:#fff; padding:22px; border-radius:16px; width:92%; max-width:420px; border:1px solid #1f263b; text-align:center; box-shadow: 0 30px 60px rgba(2,3,10,0.7); }
-  .modal .actions{ display:flex; gap:10px; margin-top:8px; }
-  .tg{ flex:1; padding:12px; border-radius:12px; text-decoration:none; background:linear-gradient(90deg,#5f2bff,#9a4dff); color:#fff; font-weight:800; }
-  .check{ flex:1; padding:12px; border-radius:12px; background:#0a0f15; color:#9ff0c7; border:1px solid rgba(255,255,255,0.03); font-weight:800; }
+  .modal .actions{ display:flex; gap:10px; justify-content:center; margin-top:8px; }
+  .btn-small{ padding:10px 12px; border-radius:10px; font-weight:800; border:none; cursor:pointer; }
+  .tg{ background:linear-gradient(90deg,#5f2bff,#9a4dff); color:#fff; }
+  .check{ background:#0a0f15; color:#9ff0c7; border:1px solid rgba(255,255,255,0.03); }
+  .disabled { opacity:0.55; pointer-events:none; }
 
-  /* small helpers */
-  .muted{ color:#7a86a8; font-size:13px; }
-  @media (min-width:520px){ .app{ max-width:640px } }
+  @media (min-width:520px){ .app{ max-width:720px } }
 </style>
 </head>
 <body>
-  <div class="app" role="application" aria-label="Trading dashboard">
+  <div class="app" role="application">
     <div class="heading">Advanced Trading Signals</div>
     <div class="subtext">Pairs · Time · Signal</div>
 
     <div class="card" id="mainCard">
       <div class="pair-row">
-        <div class="pair-flag" id="flag1Wrap" style="background:#fff;color:#0a0d1d;border:1px solid rgba(0,0,0,0.06);">EU</div>
+        <div class="pair-flag" id="flag1Wrap"><img id="flag1Img" src="" alt="" style="width:100%;height:100%;object-fit:cover"></div>
         <div style="display:flex;flex-direction:column;align-items:center">
           <div class="pair-title" id="pairTitle">EUR / USD (OTC)</div>
-          <div class="pair-meta" id="pairMeta">Live Signal · <span id="tfText">5s</span> Frame</div>
+          <div class="pair-meta" id="pairMeta">Live Signal · 5s Frame</div>
         </div>
-        <div class="pair-flag" id="flag2Wrap" style="background:#fff;color:#0a0d1d;border:1px solid rgba(0,0,0,0.06);">US</div>
+        <div class="pair-flag" id="flag2Wrap"><img id="flag2Img" src="" alt="" style="width:100%;height:100%;object-fit:cover"></div>
       </div>
 
+      <!-- ring -->
       <div class="ring" role="img" aria-label="confidence ring">
         <svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">
           <circle cx="66" cy="66" r="56" stroke="#22263b" stroke-width="10" fill="none"></circle>
-          <circle id="progressCircle" cx="66" cy="66" r="56" stroke="#b06bff" stroke-width="10" stroke-linecap="round" fill="none"
-            stroke-dasharray="351.858" stroke-dashoffset="351.858"></circle>
+          <circle id="progressCircle" cx="66" cy="66" r="56" stroke="#b06bff" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="351.858" stroke-dashoffset="351.858"></circle>
         </svg>
         <div class="percent" id="ringPercent">--%</div>
       </div>
@@ -155,37 +147,26 @@
       <div id="processingText" style="margin-top:10px;color:#8a94ad;font-size:13px">Analyzing signal…</div>
       <div style="margin-top:4px;color:#58607a;font-size:12px">Processing market data</div>
 
-      <div class="indicators" id="indicatorsList" aria-hidden="false">
-        <!-- chips injected by JS -->
-      </div>
+      <div class="indicators" id="indicatorsList" aria-hidden="false"></div>
 
       <button class="btn-primary" id="generateBtn">⚡ Generate New Signal</button>
       <button class="btn-ghost" id="backBtn">← Back to Pairs</button>
 
       <div class="powered">Powered by Advanced AI</div>
 
-      <div id="glowHalo" class="glow-halo" aria-hidden="true"></div>
+      <div class="glow-halo" id="glowHalo" aria-hidden="true"></div>
 
       <div class="arrow-overlay" id="arrowOverlay" aria-hidden="true">
         <div class="arrow-up" id="arrowUp" style="display:none">
-          <!-- Up arrow svg -->
-          <svg viewBox="0 0 140 90" width="160" height="82" xmlns="http://www.w3.org/2000/svg">
-            <path id="arrowPathUp" d="M12 60 L55 18 L85 46 L128 8" stroke="#34D399" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-            <path d="M124 12 L132 18 L118 20" stroke="#34D399" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-          </svg>
+          <svg viewBox="0 0 140 90" width="160" height="82"><path d="M12 60 L55 18 L85 46 L128 8" stroke="#34D399" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none" /><path d="M124 12 L132 18 L118 20" stroke="#34D399" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" /></svg>
         </div>
         <div class="arrow-down" id="arrowDown" style="display:none">
-          <!-- Down arrow svg -->
-          <svg viewBox="0 0 140 90" width="160" height="82" xmlns="http://www.w3.org/2000/svg">
-            <path id="arrowPathDown" d="M12 18 L55 60 L85 30 L128 72" stroke="#ff5b74" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-            <path d="M124 68 L132 62 L118 60" stroke="#ff5b74" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-          </svg>
+          <svg viewBox="0 0 140 90" width="160" height="82"><path d="M12 18 L55 60 L85 30 L128 72" stroke="#ff5b74" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none" /><path d="M124 68 L132 62 L118 60" stroke="#ff5b74" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" /></svg>
         </div>
       </div>
 
       <div id="signalLabel" class="signal-label" aria-hidden="true"></div>
 
-      <!-- Admin debug -->
       <div id="adminPanel" class="admin-panel" style="display:none" aria-hidden="true">
         <h4>ADMIN DEBUG</h4>
         <div class="admin-row"><div class="admin-key">Final Signal</div><div id="admSignal" class="admin-val">—</div></div>
@@ -201,10 +182,9 @@
             <div id="exposeSwitch" class="switch" role="button" aria-pressed="false"><div class="knob"></div></div>
           </div>
         </div>
-
       </div>
-    </div><!-- card -->
-  </div><!-- app -->
+    </div> <!-- card -->
+  </div> <!-- app -->
 
   <!-- subscription modal -->
   <div class="modal" id="subModal" role="dialog" aria-modal="true" aria-hidden="true">
@@ -212,18 +192,17 @@
       <h3 id="modalTitle">Subscription Required</h3>
       <p id="modalText">To generate live AI trading signals you must activate a subscription through our official Telegram bot. Subscribing gives you verified access to real-time signals, push notifications, and automated trade execution options.</p>
       <div class="actions" id="modalActions">
-        <a id="tgLink" class="tg" href="https://t.me/Trade_Algo_Robot?start=tradealgo_sub" target="_blank" rel="noopener noreferrer">Open Telegram Bot</a>
-        <button id="iSubscribedBtn" class="check">I Subscribed</button>
+        <a class="btn-small tg" id="tgLink" href="https://t.me/Trade_Algo_Robot?start=tradealgo_sub" target="_blank" rel="noopener noreferrer">Open Telegram Bot</a>
+        <button class="btn-small check" id="iSubscribedBtn">I Subscribed</button>
       </div>
-      <div id="pendingArea" style="display:none;margin-top:12px">
+      <div id="pendingArea" style="display:none; margin-top:12px;">
         <div style="padding:14px;border-radius:12px;background: linear-gradient(180deg,#071028,#071022);border:1px solid rgba(255,255,255,0.02);color:#c8d2e6;text-align:left">
           <p><strong>Upload proof of payment inside our Telegram bot.</strong></p>
-          <p style="color:#9aa4bd;font-size:13px">After you send the screenshot or receipt in Telegram, our support will verify the payment and activate your access instantly. This page will unlock when verification is complete.</p>
-          <div style="margin-top:12px;display:flex;gap:8px">
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
             <button id="waitingBtn" class="btn-ghost disabled" style="flex:1">Waiting for verification…</button>
             <button id="cancelPending" class="btn-ghost" style="flex:1">Cancel</button>
           </div>
-          <p style="color:#7a86a8;font-size:12px;margin-top:10px">If you are verified by Telegram support they can either redirect you back with <code>?verified=1</code> or activate you server-side.</p>
+          <p style="margin-top:10px;color:#7a86a8;font-size:12px">If verified they can redirect you back with <code>?verified=1</code> or activate server-side.</p>
         </div>
       </div>
     </div>
@@ -231,20 +210,26 @@
 
 <script>
 (function(){
-  /* ---------- Utils & UI refs ---------- */
   const qs = n => new URLSearchParams(location.search).get(n);
-  function flagBadge(code){ return code ? code.toUpperCase().slice(0,2) : ''; }
-  function formatPair(p){ return (p && p.length===6) ? p.slice(0,3) + ' / ' + p.slice(3) : p; }
-
   const rawPair = qs('pair') || 'EURUSD';
   const tf = qs('tf') || '5s';
+  const flag1 = qs('flag1') || '';
+  const flag2 = qs('flag2') || '';
+  const ADMIN_KEY_EXPECTED = 'CipherDev12$';
+
+  // UI refs
   const pairTitleEl = document.getElementById('pairTitle');
   const pairMetaEl = document.getElementById('pairMeta');
-  const tfText = document.getElementById('tfText');
-  const flag1Wrap = document.getElementById('flag1Wrap');
-  const flag2Wrap = document.getElementById('flag2Wrap');
+  const flag1Img = document.getElementById('flag1Img');
+  const flag2Img = document.getElementById('flag2Img');
   const generateBtn = document.getElementById('generateBtn');
   const backBtn = document.getElementById('backBtn');
+  const subModal = document.getElementById('subModal');
+  const iSubBtn = document.getElementById('iSubscribedBtn');
+  const modalActions = document.getElementById('modalActions');
+  const pendingArea = document.getElementById('pendingArea');
+  const waitingBtn = document.getElementById('waitingBtn');
+  const cancelPending = document.getElementById('cancelPending');
   const progressCircle = document.getElementById('progressCircle');
   const ringPercent = document.getElementById('ringPercent');
   const indicatorsList = document.getElementById('indicatorsList');
@@ -253,6 +238,7 @@
   const arrowDown = document.getElementById('arrowDown');
   const glowHalo = document.getElementById('glowHalo');
   const signalLabel = document.getElementById('signalLabel');
+
   const adminPanel = document.getElementById('adminPanel');
   const admSignal = document.getElementById('admSignal');
   const admConfidence = document.getElementById('admConfidence');
@@ -260,15 +246,9 @@
   const admIndicators = document.getElementById('admIndicators');
   const exposeSwitch = document.getElementById('exposeSwitch');
 
-  const subModal = document.getElementById('subModal');
-  const iSubBtn = document.getElementById('iSubscribedBtn');
-  const modalActions = document.getElementById('modalActions');
-  const pendingArea = document.getElementById('pendingArea');
-  const waitingBtn = document.getElementById('waitingBtn');
-  const cancelPending = document.getElementById('cancelPending');
+  function flagUrl(code,size){ if(!code) return ''; return `https://flagcdn.com/w${size}/${code}.png`; }
+  function formatPair(p){ return (p && p.length===6) ? p.slice(0,3) + ' / ' + p.slice(3) : p; }
 
-  /* ---------- Admin auth ---------- */
-  const ADMIN_KEY_EXPECTED = 'CipherDev12$';
   function isAdmin(){
     try {
       if(qs('admin') === '1' && qs('admin_key') === ADMIN_KEY_EXPECTED){
@@ -276,19 +256,13 @@
         return true;
       }
       return localStorage.getItem('tradealgo_admin') === '1';
-    } catch(e) { return false; }
+    } catch(e){ return false; }
   }
-
+  function isVerified(){ return localStorage.getItem('tradealgo_verified') === '1'; }
   function exposeSignalsEnabled(){ return localStorage.getItem('tradealgo_expose') === '1'; }
-  function setExposeSignals(v){ localStorage.setItem('tradealgo_expose', v ? '1' : '0'); renderExposeSwitch(); }
+  function setExposeSignals(v){ try{ localStorage.setItem('tradealgo_expose', v ? '1' : '0'); }catch(e){} renderExposeSwitch(); }
 
-  function renderExposeSwitch(){
-    if(!exposeSwitch) return;
-    const on = exposeSignalsEnabled();
-    if(on){ exposeSwitch.classList.add('on'); exposeSwitch.setAttribute('aria-pressed','true'); } else { exposeSwitch.classList.remove('on'); exposeSwitch.setAttribute('aria-pressed','false'); }
-  }
-
-  /* ---------- PRNG + indicators ---------- */
+  // seeded PRNG
   function seeded(seedString){
     let seed = 0;
     for(let i=0;i<seedString.length;i++) seed = (seed*31 + seedString.charCodeAt(i)) % 1000000;
@@ -324,7 +298,6 @@
     return {indicators,score:Number((score*10).toFixed(2)),confidence};
   }
 
-  /* ---------- UI render helpers ---------- */
   function renderIndicatorChips(ind){
     indicatorsList.innerHTML = '';
     const mapping = [
@@ -343,21 +316,21 @@
       btn.innerText = label;
       btn.title = String(val);
       btn.dataset.val = val;
-      btn.addEventListener('click', ()=> btn.classList.toggle('selected'));
+      btn.addEventListener('click', ()=> { btn.classList.toggle('selected'); });
       indicatorsList.appendChild(btn);
     });
   }
 
+  // ring animation
   function setRingPercent(pct){
     const radius = 56;
     const circumference = 2 * Math.PI * radius;
-    progressCircle.setAttribute('stroke-dasharray', circumference.toFixed(3));
     const offset = Math.round(circumference * (1 - pct/100));
-    progressCircle.style.transition = 'stroke-dashoffset 800ms cubic-bezier(.2,.9,.36,1)';
-    // force reflow for consistent animation
-    void progressCircle.getBoundingClientRect();
-    progressCircle.style.strokeDashoffset = offset;
-    ringPercent.textContent = pct + '%';
+    const circle = document.getElementById('progressCircle');
+    circle.setAttribute('stroke-dasharray', circumference.toFixed(3));
+    circle.style.transition = 'stroke-dashoffset 800ms cubic-bezier(.2,.9,.36,1)';
+    circle.style.strokeDashoffset = offset;
+    document.getElementById('ringPercent').textContent = pct + '%';
   }
 
   function decideSignalFromIndicators(ind){
@@ -366,11 +339,10 @@
   }
 
   function showArrow(direction, confidence){
-    arrowUp.style.display = 'none';
-    arrowDown.style.display = 'none';
+    arrowUp.style.display = 'none'; arrowDown.style.display = 'none';
     glowHalo.className = 'glow-halo';
-    signalLabel.className = 'signal-label'; signalLabel.textContent = '';
-
+    signalLabel.className = 'signal-label';
+    signalLabel.textContent = '';
     if(direction === 'UP'){
       arrowUp.style.display = 'block';
       glowHalo.classList.add('up','show');
@@ -383,7 +355,7 @@
       signalLabel.textContent = `Your signal is DOWN — ${confidence}%`;
     }
     arrowOverlay.classList.add('show');
-    setTimeout(()=>{ arrowOverlay.classList.remove('show'); glowHalo.className='glow-halo'; signalLabel.classList.remove('show'); }, 5000);
+    setTimeout(()=>{ arrowOverlay.classList.remove('show'); glowHalo.className = 'glow-halo'; signalLabel.classList.remove('show'); }, 5000);
   }
 
   function renderAdminDebug(out){
@@ -401,23 +373,24 @@
     }
   }
 
-  /* ---------- Init header & seed ---------- */
+  function renderExposeSwitch(){
+    if(!exposeSwitch) return;
+    const on = exposeSignalsEnabled();
+    if(on){ exposeSwitch.classList.add('on'); exposeSwitch.setAttribute('aria-pressed','true'); } else { exposeSwitch.classList.remove('on'); exposeSwitch.setAttribute('aria-pressed','false'); }
+  }
+
+  // header apply
   pairTitleEl.textContent = `${formatPair(rawPair)} (OTC)`;
   pairMetaEl.textContent = `Live Signal · ${tf} Frame`;
-  tfText.textContent = tf;
+  if(flag1){ flag1Img.src = flagUrl(flag1,40); flag1Img.alt = flag1; document.getElementById('flag1Wrap').style.display='inline-block'; } else document.getElementById('flag1Wrap').style.display='none';
+  if(flag2){ flag2Img.src = flagUrl(flag2,40); flag2Img.alt = flag2; document.getElementById('flag2Wrap').style.display='inline-block'; } else document.getElementById('flag2Wrap').style.display='none';
 
-  // flags: query param flag1/flag2 (e.g. flag1=eu&flag2=us), else default
-  const flag1 = (qs('flag1') || 'EU').toUpperCase();
-  const flag2 = (qs('flag2') || 'US').toUpperCase();
-  flag1Wrap.textContent = flagBadge(flag1);
-  flag2Wrap.textContent = flagBadge(flag2);
-
+  // initial render
   const seedBase = rawPair + '::' + (new Date()).toISOString().slice(0,16);
   const initial = makeIndicators(seedBase);
   renderIndicatorChips(initial.indicators);
   setTimeout(()=> setRingPercent(initial.confidence), 120);
 
-  // show admin panel if admin
   if(isAdmin()){
     renderAdminDebug({ finalSignal:'—', confidence: initial.confidence, strength: initial.score, indicators: initial.indicators });
     renderExposeSwitch();
@@ -425,12 +398,10 @@
     adminPanel.style.display = 'none';
   }
 
-  /* ---------- Button behavior ---------- */
+  // generate button behavior
   generateBtn.addEventListener('click', ()=>{
     if(isAdmin()){
-      // admin always can generate
-      generateBtn.disabled = true;
-      generateBtn.textContent = 'Generating...';
+      generateBtn.disabled = true; generateBtn.textContent = 'Generating...';
       setTimeout(()=>{
         const nowData = makeIndicators(rawPair + '|' + Date.now());
         const finalSignal = decideSignalFromIndicators(nowData.indicators);
@@ -438,75 +409,60 @@
         renderIndicatorChips(nowData.indicators);
         showArrow(finalSignal, nowData.confidence);
         renderAdminDebug({ finalSignal, confidence: nowData.confidence, strength: nowData.score, indicators: nowData.indicators });
-        try{ localStorage.setItem('tradealgo_last_signal', JSON.stringify({pair:rawPair,tf,signal:finalSignal,confidence:nowData.confidence,indicators:nowData.indicators,ts:Date.now()})); }catch(e){}
-        generateBtn.textContent = '⚡ Generate New Signal';
-        generateBtn.disabled = false;
+        try { localStorage.setItem('tradealgo_last_signal', JSON.stringify({pair:rawPair,tf,signal:finalSignal,confidence:nowData.confidence,indicators:nowData.indicators,ts:Date.now()})); }catch(e){}
+        generateBtn.textContent = '⚡ Generate New Signal'; generateBtn.disabled = false;
       }, 850);
       return;
     }
 
-    // non-admin: allowed only if admin exposed signals
     if(exposeSignalsEnabled()){
-      generateBtn.disabled = true;
-      generateBtn.textContent = 'Generating...';
+      generateBtn.disabled = true; generateBtn.textContent = 'Generating...';
       setTimeout(()=>{
         const nowData = makeIndicators(rawPair + '|' + Date.now());
         const finalSignal = decideSignalFromIndicators(nowData.indicators);
         setRingPercent(nowData.confidence);
         renderIndicatorChips(nowData.indicators);
         showArrow(finalSignal, nowData.confidence);
-        try{ localStorage.setItem('tradealgo_last_signal', JSON.stringify({pair:rawPair,tf,signal:finalSignal,confidence:nowData.confidence,indicators:nowData.indicators,ts:Date.now()})); }catch(e){}
-        generateBtn.textContent = '⚡ Generate New Signal';
-        generateBtn.disabled = false;
+        try { localStorage.setItem('tradealgo_last_signal', JSON.stringify({pair:rawPair,tf,signal:finalSignal,confidence:nowData.confidence,indicators:nowData.indicators,ts:Date.now()})); }catch(e){}
+        generateBtn.textContent = '⚡ Generate New Signal'; generateBtn.disabled = false;
       }, 900);
       return;
     }
 
-    // normal users -> subscription prompt
+    // normal user: subscription
     subModal.style.display = 'flex';
     subModal.setAttribute('aria-hidden','false');
   });
 
-  backBtn.addEventListener('click', ()=> { /* go back to pairs list - placeholder */ alert('Back to pairs (implement navigation to your pairs list)'); });
+  // back: prefer pairs.html, else history.back()
+  backBtn.addEventListener('click', ()=>{
+    const tryUrl = 'pairs.html';
+    // attempt to navigate to pairs.html first
+    fetch(tryUrl, {method:'HEAD'}).then(resp=>{
+      if(resp.ok) { window.location.href = tryUrl; } else { history.back(); }
+    }).catch(()=> { history.back(); });
+  });
 
-  // modal handlers
+  // subscription modal handlers
   iSubBtn.addEventListener('click', ()=>{
     try{ localStorage.setItem('tradealgo_subscribed','pending'); }catch(e){}
-    modalActions.style.display = 'none';
-    pendingArea.style.display = 'block';
-    waitingBtn.classList.add('disabled');
+    modalActions.style.display = 'none'; pendingArea.style.display = 'block'; waitingBtn.classList.add('disabled');
   });
-
   cancelPending.addEventListener('click', ()=>{
     try{ localStorage.removeItem('tradealgo_subscribed'); }catch(e){}
-    pendingArea.style.display = 'none';
-    modalActions.style.display = 'flex';
-    subModal.style.display = 'none';
-    subModal.setAttribute('aria-hidden','true');
+    pendingArea.style.display = 'none'; modalActions.style.display = 'flex'; subModal.style.display = 'none'; subModal.setAttribute('aria-hidden','true');
   });
-
   subModal.addEventListener('click', (e)=>{ if(e.target === subModal){ subModal.style.display = 'none'; subModal.setAttribute('aria-hidden','true'); } });
 
-  // expose toggle (admin only)
-  if(exposeSwitch){
-    exposeSwitch.addEventListener('click', ()=>{
-      if(!isAdmin()) return;
-      const newVal = !exposeSignalsEnabled();
-      setExposeSignals(newVal);
-    });
-  }
+  // expose toggle
+  if(exposeSwitch){ exposeSwitch.addEventListener('click', ()=>{ if(!isAdmin()) return; setExposeSignals(!exposeSignalsEnabled()); }); }
 
-  // ensure admin UI visible when auth in query param
-  if(isAdmin()){
-    adminPanel.style.display = 'block';
-    renderExposeSwitch();
-  } else {
-    adminPanel.style.display = 'none';
-  }
+  // ensure admin panel shows if admin flag saved
+  if(isAdmin()){ adminPanel.style.display = 'block'; renderExposeSwitch(); } else { adminPanel.style.display = 'none'; }
 
-  // poll for verification (simulate)
+  // poll for verification
   let pollTimer = setInterval(()=>{
-    if(localStorage.getItem('tradealgo_verified') === '1'){
+    if(isVerified()){
       waitingBtn.classList.remove('disabled');
       waitingBtn.textContent = 'Verified — Ready';
       if(subModal.style.display === 'flex'){ setTimeout(()=>{ subModal.style.display='none'; subModal.setAttribute('aria-hidden','true'); }, 700); }
