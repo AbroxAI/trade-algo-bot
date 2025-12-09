@@ -1,467 +1,150 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Trade Algo Bot — Signal</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade Signal</title>
+
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    font-family: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, Arial, sans-serif;
-    background: linear-gradient(180deg,#060718 0%, #040417 45%, #02030a 100%);
-    color:#e6eef8;
-    min-height:100vh;
-    display:flex;align-items:center;justify-content:center;padding:12px;
-  }
-  .app{ width:100%; max-width:520px; background: linear-gradient(180deg, rgba(6,12,28,0.98), rgba(9,10,20,0.99)); border-radius:18px; box-shadow:0 30px 60px rgba(2,3,10,0.7); padding:18px; border:1px solid rgba(255,255,255,0.02); position:relative; }
-  .heading { text-align:center; font-weight:800; font-size:16px; margin-bottom:8px; color:#fff;}
-  .subtext{ text-align:center;color:rgba(230,238,248,0.62); font-size:12px; margin-bottom:12px; }
-  .card { background:#0a0d1d; border-radius:16px; border:1px solid #1a1f35; padding:16px; text-align:center; position:relative; overflow:visible; }
+    body {
+        margin: 0;
+        background: #0d0f2a;
+        font-family: Poppins, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 30px;
+        color: #fff;
+    }
 
-  .pair-row { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:8px; }
-  .pair-flag { width:36px; height:26px; border-radius:6px; overflow:hidden; display:inline-block; border:1px solid rgba(255,255,255,0.03); box-shadow:0 8px 18px rgba(2,4,10,0.35); }
-  .pair-title{ font-weight:800; font-size:16px; margin-bottom:4px; display:flex; align-items:center; gap:8px; justify-content:center; color:#f3f6fb }
-  .pair-meta{ font-size:12px; color:#7a86a8; margin-bottom:12px; opacity:0.95 }
+    /* Top Info Row */
+    .info-row {
+        text-align: center;
+        margin-bottom: 10px;
+    }
 
-  /* RING (processing) */
-  .ring { width:132px;height:132px;border-radius:50%;margin:6px auto 8px;display:flex;align-items:center;justify-content:center; position:relative; transition:opacity 400ms ease, transform 420ms cubic-bezier(.2,.9,.36,1); }
-  .ring.hidden { opacity:0; transform:scale(0.96); pointer-events:none; }
-  .ring .percent{ font-weight:900; font-size:20px; color:#b06bff; z-index:3; text-shadow:0 2px 8px rgba(176,107,255,0.12) }
-  .ring svg{ position:absolute; left:0; top:0; transform:rotate(-90deg); }
+    .pair-name {
+        font-size: 20px;
+        font-weight: 600;
+    }
 
-  /* REPLICA ARROW UI (hidden until after processing) */
-  .replica { display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:6px; transition:opacity 420ms ease, transform 420ms cubic-bezier(.2,.9,.36,1); opacity:0; transform:translateY(8px); pointer-events:none; }
-  .replica.show { opacity:1; transform:translateY(0); pointer-events:auto; }
-  .replica-frame{
-    width:260px; height:320px; border-radius:18px; background: linear-gradient(180deg,#0e1630,#06102b); border:1px solid rgba(255,255,255,0.03);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; box-shadow: 0 24px 48px rgba(2,3,10,0.6);
-  }
-  .replica-inner {
-    width:78%; height:62%; border-radius:14px; background: linear-gradient(180deg,#12142a,#060919);
-    display:flex; align-items:center; justify-content:center; box-shadow: inset 0 12px 30px rgba(0,0,0,0.6);
-  }
-  .replica-arrow{
-    width:110px; height:90px; display:block;
-  }
-  .replica-text{
-    margin-top:12px; font-weight:900; font-size:15px; color:#ff334a; letter-spacing:0.2px; text-transform:uppercase;
-    text-shadow: 0 8px 30px rgba(0,0,0,0.6);
-  }
+    .tf {
+        font-size: 14px;
+        opacity: 0.8;
+    }
 
-  .indicators{ display:flex; gap:8px; justify-content:center; margin-top:12px; margin-bottom:6px; flex-wrap:wrap }
-  .ind-chip{ padding:8px 12px; border-radius:999px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.03); color:#fff; font-weight:700; font-size:12px; cursor:pointer; box-shadow: 0 8px 18px rgba(2,4,10,0.35); }
-  .ind-chip.selected { background: linear-gradient(90deg,#17182b,#121224); color:#fff; box-shadow: 0 10px 28px rgba(60,20,140,0.18); }
+    /* Card UI (Replica of Video) */
+    .signal-box {
+        width: 260px;
+        height: 260px;
+        background: #1b1e3b;
+        border-radius: 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        box-shadow: 0px 0px 20px rgba(0,0,0,0.35);
+        margin-bottom: 15px;
+    }
 
-  .btn-primary{ width:100%; padding:14px; border-radius:14px; border:none; font-weight:800; font-size:15px; color:#fff; cursor:pointer; background:linear-gradient(90deg,#5f2bff,#9a4dff); margin-top:10px; box-shadow: 0 6px 18px rgba(95,43,255,0.12); }
-  .btn-ghost{ width:100%; padding:12px; border-radius:12px; border:1px solid #1a1f35; font-weight:700; font-size:14px; color:#7a86a8; background:transparent; cursor:pointer; margin-top:6px }
+    /* Arrow container */
+    .arrow {
+        width: 90px;
+        height: 90px;
+        border-right: 12px solid #00ff57;
+        border-bottom: 12px solid #00ff57;
+        transform: rotate(-45deg);
+        border-radius: 4px;
+    }
 
-  .glow-halo { position:absolute; width:260px; height:160px; left:50%; top:44%; transform:translateX(-50%) translateY(-50%) scale(0.95); border-radius:20px; pointer-events:none; z-index:4; opacity:0; mix-blend-mode:screen; transition:opacity 240ms ease; }
-  .glow-halo.up { background: radial-gradient(closest-side, rgba(52,211,153,0.16), rgba(52,211,153,0.03) 40%, transparent 55%); animation: haloUp 1500ms ease-in-out 1; }
-  .glow-halo.down { background: radial-gradient(closest-side, rgba(255,77,109,0.16), rgba(255,77,109,0.03) 40%, transparent 55%); animation: haloDown 1500ms ease-in-out 1; }
-  .glow-halo.show { opacity:1; }
+    /* DOWN arrow */
+    .down {
+        transform: rotate(135deg);
+    }
 
-  @keyframes haloUp { 0%{transform:translateX(-50%) translateY(-50%) scale(0.9); opacity:0} 20%{opacity:0.9; transform:translateX(-50%) translateY(-50%) scale(1.06)} 100%{opacity:0.12; transform:translateX(-50%) translateY(-50%) scale(1.12)} }
-  @keyframes haloDown { 0%{transform:translateX(-50%) translateY(-50%) scale(0.9); opacity:0} 20%{opacity:0.9; transform:translateX(-50%) translateY(-50%) scale(1.06)} 100%{opacity:0.12; transform:translateX(-50%) translateY(-50%) scale(1.12)} }
+    /* Signal text */
+    .signal-text {
+        margin-top: 10px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #ff3b3b;
+        text-align: center;
+    }
 
-  .admin-panel{ margin-top:14px;background: linear-gradient(180deg,#071028,#061022);border-radius:12px;padding:12px;text-align:left;font-size:13px;color:#c8d2e6;border:1px solid rgba(255,255,255,0.02); box-shadow: 0 8px 30px rgba(2,3,12,0.6); display:none }
-  .admin-row{ display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,0.02);}
-  .admin-key { color:#9aa4bd; font-weight:700; } .admin-val { color:#fff; font-weight:800; }
-  .toggle { display:inline-flex; align-items:center; gap:8px; }
-  .switch { width:46px; height:26px; border-radius:999px; background:#10121b; position:relative; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
-  .knob { position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:999px; background:#e6eef8; transition:left 180ms cubic-bezier(.2,.9,.36,1); }
-  .switch.on { background: linear-gradient(90deg,#34d399,#0f7f4a); }
-  .switch.on .knob{ left:23px; background:#04241a; }
+    /* Active indicators */
+    .tag {
+        margin-top: 10px;
+        background: #2a2d52;
+        border-radius: 30px;
+        padding: 6px 12px;
+        font-size: 13px;
+    }
 
-  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter: blur(4px); justify-content:center; align-items:center; z-index:9999; }
-  .modal .box{ background:#0b0f1e; color:#fff; padding:22px; border-radius:16px; width:92%; max-width:420px; border:1px solid #1f263b; text-align:center; box-shadow: 0 30px 60px rgba(2,3,10,0.7); }
-  .modal .actions{ display:flex; gap:10px; justify-content:center; margin-top:8px; }
-  .btn-small{ padding:10px 12px; border-radius:10px; font-weight:800; border:none; cursor:pointer; }
-  .tg{ background:linear-gradient(90deg,#5f2bff,#9a4dff); color:#fff; }
-  .check{ background:#0a0f15; color:#9ff0c7; border:1px solid rgba(255,255,255,0.03); }
-  .disabled { opacity:0.55; pointer-events:none; }
+    /* Buttons */
+    button {
+        width: 260px;
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(90deg, #6a5dfc, #8f6dfd);
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.25s;
+    }
 
-  .percent-sub{ font-size:12px; color:#9aa4bd; margin-top:6px }
+    button:hover {
+        opacity: 0.8;
+    }
+
+    .back-btn {
+        background: #24273f;
+        margin-top: 10px;
+    }
 </style>
 </head>
 <body>
-  <div class="app" role="application">
-    <div class="heading">Advanced Trading Signals</div>
-    <div class="subtext">Pairs · Time · Signal</div>
 
-    <div class="card" id="mainCard">
-      <div class="pair-row">
-        <div class="pair-flag" id="flag1Wrap"><img id="flag1Img" src="" alt="" style="width:100%;height:100%;object-fit:cover"></div>
-        <div style="display:flex;flex-direction:column;align-items:center">
-          <div class="pair-title" id="pairTitle">EUR / USD (OTC)</div>
-          <div class="pair-meta" id="pairMeta">Live Signal · 5s Frame</div>
-        </div>
-        <div class="pair-flag" id="flag2Wrap"><img id="flag2Img" src="" alt="" style="width:100%;height:100%;object-fit:cover"></div>
-      </div>
+<div class="info-row">
+    <div class="pair-name" id="pairLabel">EUR / USD</div>
+    <div class="tf" id="tfLabel">60s Timeframe</div>
+</div>
 
-      <!-- processing ring -->
-      <div class="ring" id="ringWrap" role="img" aria-label="confidence ring">
-        <svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">
-          <circle cx="66" cy="66" r="56" stroke="#22263b" stroke-width="10" fill="none"></circle>
-          <circle id="progressCircle" cx="66" cy="66" r="56" stroke="#b06bff" stroke-width="10" stroke-linecap="round" fill="none" stroke-dasharray="351.858" stroke-dashoffset="351.858"></circle>
-        </svg>
-        <div class="percent" id="ringPercent">--%</div>
-        <div class="percent-sub" id="ringSub">Analyzing market data…</div>
-      </div>
+<div class="signal-box">
+    <div id="arrow" class="arrow"></div>
+</div>
 
-      <!-- replica arrow UI (hidden until processing done) -->
-      <div class="replica" id="replicaUI" aria-hidden="true">
-        <div class="replica-frame" role="img" aria-label="signal display">
-          <div class="replica-inner" id="replicaInner">
-            <!-- SVG arrow goes here -->
-            <svg class="replica-arrow" id="replicaArrow" viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg">
-              <path id="replicaPath" d="M12 60 L55 18 L85 46 L128 8" stroke="#9adf6a" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-              <path id="replicaHead" d="M124 12 L132 18 L118 20" stroke="#9adf6a" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>
-          </div>
-          <div class="replica-text" id="replicaText" aria-hidden="true">Your signal is UP</div>
-        </div>
+<div id="signalText" class="signal-text">Your signal: UP</div>
 
-        <div class="indicators" id="indicatorsList" aria-hidden="false"></div>
-      </div>
+<div class="tag">Base Analysis</div>
 
-      <button class="btn-primary" id="generateBtn">⚡ Generate New Signal</button>
-      <button class="btn-ghost" id="backBtn">← Back to Dashboard</button>
+<button id="generateBtn">Generate New Signal</button>
 
-      <div class="glow-halo" id="glowHalo" aria-hidden="true"></div>
-
-      <div id="adminPanel" class="admin-panel" aria-hidden="true">
-        <h4>ADMIN DEBUG</h4>
-        <div class="admin-row"><div class="admin-key">Final Signal</div><div id="admSignal" class="admin-val">—</div></div>
-        <div class="admin-row"><div class="admin-key">Confidence</div><div id="admConfidence" class="admin-val">—</div></div>
-        <div class="admin-row"><div class="admin-key">Strength</div><div id="admStrength" class="admin-val">—</div></div>
-
-        <div style="margin-top:8px;font-weight:800;color:#9aa4bd">Indicator Breakdown</div>
-        <div id="admIndicators" style="margin-top:8px"></div>
-
-        <div class="admin-controls" style="margin-top:10px">
-          <div style="font-size:13px;color:#9aa4bd">Expose signals to users</div>
-          <div class="toggle" id="exposeToggleWrap" title="Toggle whether non-admin users can get live signals">
-            <div id="exposeSwitch" class="switch" role="button" aria-pressed="false"><div class="knob"></div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- subscription modal -->
-  <div class="modal" id="subModal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="box" id="modalBox">
-      <h3 id="modalTitle">Subscription Required</h3>
-      <p id="modalText">To generate live AI trading signals you must activate a subscription through our official Telegram bot.</p>
-      <div class="actions" id="modalActions">
-        <a class="btn-small tg" id="tgLink" href="https://t.me/Trade_Algo_Robot?start=tradealgo_sub" target="_blank" rel="noopener noreferrer">Open Telegram Bot</a>
-        <button class="btn-small check" id="iSubscribedBtn">I Subscribed</button>
-      </div>
-      <div id="pendingArea" style="display:none; margin-top:12px;">
-        <div style="padding:14px;border-radius:12px;background: linear-gradient(180deg,#071028,#071022);border:1px solid rgba(255,255,255,0.02);color:#c8d2e6;text-align:left">
-          <p><strong>Upload proof of payment inside our Telegram bot.</strong></p>
-          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
-            <button id="waitingBtn" class="btn-ghost disabled" style="flex:1">Waiting for verification…</button>
-            <button id="cancelPending" class="btn-ghost" style="flex:1">Cancel</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<button class="back-btn" onclick="window.location.href='dashboard.html'">⬅ Back to Pairs</button>
 
 <script>
-(function(){
-  // small helpers
-  const qs = n => new URLSearchParams(location.search).get(n);
-  const ADMIN_KEY_EXPECTED = 'CipherDev12$';
+    // Extract URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const pair = urlParams.get("pair") || "EUR/USD";
+    const tf = urlParams.get("tf") || "60s";
 
-  // UI refs
-  const rawPair = qs('pair') || 'EURUSD';
-  const tf = qs('tf') || '5s';
-  const flag1 = qs('flag1') || '';
-  const flag2 = qs('flag2') || '';
-  const pairTitleEl = document.getElementById('pairTitle');
-  const pairMetaEl = document.getElementById('pairMeta');
-  const flag1Img = document.getElementById('flag1Img');
-  const flag2Img = document.getElementById('flag2Img');
-  const generateBtn = document.getElementById('generateBtn');
-  const backBtn = document.getElementById('backBtn');
-  const progressCircle = document.getElementById('progressCircle');
-  const ringPercent = document.getElementById('ringPercent');
-  const ringWrap = document.getElementById('ringWrap');
-  const replicaUI = document.getElementById('replicaUI');
-  const replicaText = document.getElementById('replicaText');
-  const replicaPath = document.getElementById('replicaPath');
-  const replicaHead = document.getElementById('replicaHead');
-  const replicaArrow = document.getElementById('replicaArrow');
-  const glowHalo = document.getElementById('glowHalo');
-  const indicatorsList = document.getElementById('indicatorsList');
+    document.getElementById("pairLabel").innerText = pair.replace("/", " / ");
+    document.getElementById("tfLabel").innerText = tf + " Timeframe";
 
-  const adminPanel = document.getElementById('adminPanel');
-  const admSignal = document.getElementById('admSignal');
-  const admConfidence = document.getElementById('admConfidence');
-  const admStrength = document.getElementById('admStrength');
-  const admIndicators = document.getElementById('admIndicators');
-  const exposeSwitch = document.getElementById('exposeSwitch');
+    // Generate Signal Logic
+    document.getElementById("generateBtn").addEventListener("click", () => {
+        const signal = Math.random() > 0.5 ? "UP" : "DOWN";
 
-  const subModal = document.getElementById('subModal');
-  const modalActions = document.getElementById('modalActions');
-  const iSubBtn = document.getElementById('iSubscribedBtn');
-  const pendingArea = document.getElementById('pendingArea');
-  const waitingBtn = document.getElementById('waitingBtn');
-  const cancelPending = document.getElementById('cancelPending');
+        // Apply correct arrow
+        const arrow = document.getElementById("arrow");
+        arrow.className = signal === "UP" ? "arrow" : "arrow down";
 
-  function flagUrl(code,size){ if(!code) return ''; return `https://flagcdn.com/w${size}/${code}.png`; }
-  function formatPair(p){ return (p && p.length===6) ? p.slice(0,3) + ' / ' + p.slice(3) : p; }
-
-  // admin detection
-  function isAdmin(){
-    try {
-      if(qs('admin')==='1' && qs('admin_key') === ADMIN_KEY_EXPECTED){
-        localStorage.setItem('tradealgo_admin','1');
-        return true;
-      }
-      return localStorage.getItem('tradealgo_admin') === '1';
-    } catch(e){ return false; }
-  }
-  function isVerified(){ return localStorage.getItem('tradealgo_verified') === '1'; }
-  function exposeSignalsEnabled(){ return localStorage.getItem('tradealgo_expose') === '1'; }
-  function setExposeSignals(v){ try{ localStorage.setItem('tradealgo_expose', v ? '1' : '0'); }catch(e){} renderExposeSwitch(); }
-
-  // seeded PRNG for repeatability
-  function seeded(seedString){
-    let seed = 0;
-    for(let i=0;i<seedString.length;i++) seed = (seed*31 + seedString.charCodeAt(i)) % 1000000;
-    return function(min,max){
-      seed = (seed * 9301 + 49297) % 233280;
-      const v = seed / 233280;
-      return min + v*(max-min);
-    };
-  }
-
-  // indicator generator (same as dashboard)
-  function makeIndicators(seedStr){
-    const r = seeded(seedStr);
-    const indicators = {
-      MACD: Number(r(-1.6,2.4).toFixed(2)),
-      RSI: Math.round(r(30,88)),
-      OBV_trend: Number(r(-1,1).toFixed(2)),
-      EMA_diff: Number(r(-0.8,1.8).toFixed(2)),
-      SAR_delta: Number(r(-0.6,0.9).toFixed(2)),
-      Volatility: Number(r(0.6,2.6).toFixed(2)),
-      VolumeStrength: Number(r(0.2,1.0).toFixed(2))
-    };
-    let score = 0;
-    score += Math.max(0, indicators.MACD + 1) * 0.18;
-    score += (Math.max(0, indicators.RSI - 40) / 50) * 0.18;
-    score += ((indicators.OBV_trend + 1) / 2) * 0.15;
-    score += (Math.max(0, indicators.EMA_diff + 0.8) / 2.6) * 0.14;
-    score += (Math.max(0, indicators.SAR_delta + 0.6) / 1.5) * 0.12;
-    const volScore = 1 - Math.abs(indicators.Volatility - 1.1) / 1.5;
-    score += Math.max(0, volScore) * 0.12;
-    score += indicators.VolumeStrength * 0.11;
-    score = Math.max(0, Math.min(1, score / 1.05));
-    const confidence = Math.round((0.79 + score * 0.17) * 100);
-    return {indicators,score:Number((score*10).toFixed(2)),confidence};
-  }
-
-  function renderIndicatorChips(ind){
-    indicatorsList.innerHTML = '';
-    const mapping = [
-      ['Parabolic SAR', ind.SAR_delta],
-      ['On Balance Volume', ind.OBV_trend],
-      ['MACD', ind.MACD],
-      ['RSI', ind.RSI],
-      ['EMA Cross', ind.EMA_diff],
-      ['Volatility', ind.Volatility],
-      ['Volume Strength', ind.VolumeStrength]
-    ];
-    mapping.forEach(([label,val])=>{
-      const btn = document.createElement('button');
-      btn.className = 'ind-chip';
-      btn.type = 'button';
-      btn.innerText = label;
-      btn.title = String(val);
-      btn.dataset.val = val;
-      btn.addEventListener('click', ()=> { btn.classList.toggle('selected'); });
-      indicatorsList.appendChild(btn);
+        // Set text
+        document.getElementById("signalText").innerText = "Your signal: " + signal;
     });
-  }
-
-  // ring helpers (animated)
-  function setRingPercent(pct){
-    const radius = 56;
-    const circumference = 2 * Math.PI * radius;
-    const offset = Math.round(circumference * (1 - pct/100));
-    progressCircle.setAttribute('stroke-dasharray', circumference.toFixed(3));
-    progressCircle.style.transition = 'stroke-dashoffset 420ms cubic-bezier(.2,.9,.36,1)';
-    progressCircle.style.strokeDashoffset = offset;
-    ringPercent.textContent = pct + '%';
-  }
-
-  function decideSignalFromIndicators(ind){
-    const scoreComposite = (ind.MACD * 1.3) + (ind.OBV_trend * 1.2) + (ind.EMA_diff * 1.0) + ((ind.RSI - 50) / 30);
-    return scoreComposite >= 0 ? 'UP' : 'DOWN';
-  }
-
-  // morph from ring -> replica UI
-  function morphToReplica(finalSignal, confidence, ind){
-    // hide ring
-    ringWrap.classList.add('hidden');
-    // populate replica
-    replicaText.textContent = `Your signal is ${finalSignal}`;
-    // adjust arrow color and head depending on direction
-    if(finalSignal === 'UP'){
-      replicaPath.setAttribute('stroke','#8ef07b');
-      replicaHead.setAttribute('stroke','#8ef07b');
-      glowHalo.className = 'glow-halo up show';
-    } else {
-      replicaPath.setAttribute('stroke','#ff7b8e');
-      replicaHead.setAttribute('stroke','#ff7b8e');
-      glowHalo.className = 'glow-halo down show';
-    }
-    // show indicators
-    renderIndicatorChips(ind);
-    // show replica UI
-    replicaUI.classList.add('show');
-    // admin debug update
-    renderAdminDebug({ finalSignal, confidence, strength: ind.score||'—', indicators: ind.indicators || ind });
-    // persist last signal
-    try { localStorage.setItem('tradealgo_last_signal', JSON.stringify({pair:rawPair,tf,signal:finalSignal,confidence,indicators:ind.indicators||ind,ts:Date.now()})); }catch(e){}
-  }
-
-  function renderAdminDebug(out){
-    if(!isAdmin()) return;
-    adminPanel.style.display = 'block';
-    admSignal.textContent = out.finalSignal || '—';
-    admConfidence.textContent = out.confidence ? out.confidence + '%' : '—';
-    admStrength.textContent = out.strength ? out.strength + ' / 10' : '—';
-    admIndicators.innerHTML = '';
-    const indic = out.indicators || {};
-    for(const k in indic){
-      const row = document.createElement('div');
-      row.style.display='flex'; row.style.justifyContent='space-between'; row.style.padding='6px 0';
-      row.innerHTML = `<div style="color:#9aa4bd;font-weight:700">${k}</div><div style="font-weight:800">${indic[k]}</div>`;
-      admIndicators.appendChild(row);
-    }
-  }
-
-  function renderExposeSwitch(){
-    if(!exposeSwitch) return;
-    const on = exposeSignalsEnabled();
-    if(on){ exposeSwitch.classList.add('on'); exposeSwitch.setAttribute('aria-pressed','true'); } else { exposeSwitch.classList.remove('on'); exposeSwitch.setAttribute('aria-pressed','false'); }
-  }
-
-  // init header & initial indicators
-  pairTitleEl.textContent = `${formatPair(rawPair)} (OTC)`;
-  pairMetaEl.textContent = `Live Signal · ${tf} Frame`;
-  if(flag1){ flag1Img.src = flagUrl(flag1,40); flag1Img.alt = flag1; document.getElementById('flag1Wrap').style.display='inline-block'; } else document.getElementById('flag1Wrap').style.display='none';
-  if(flag2){ flag2Img.src = flagUrl(flag2,40); flag2Img.alt = flag2; document.getElementById('flag2Wrap').style.display='inline-block'; } else document.getElementById('flag2Wrap').style.display='none';
-
-  const seedBase = rawPair + '::' + (new Date()).toISOString().slice(0,16);
-  const initial = makeIndicators(seedBase);
-  renderIndicatorChips(initial.indicators);
-  setTimeout(()=> setRingPercent(initial.confidence), 80);
-
-  // admin panel visibility
-  if(isAdmin()){
-    renderAdminDebug({ finalSignal:'—', confidence: initial.confidence, strength: initial.score, indicators: initial.indicators });
-    renderExposeSwitch();
-  } else {
-    adminPanel.style.display = 'none';
-  }
-
-  // generate flow
-  generateBtn.addEventListener('click', ()=>{
-    // admin path: always allowed to generate
-    if(isAdmin()){
-      startGenerate(true);
-      return;
-    }
-    // non-admin: if admin exposed signals, allow preview, else subscription modal
-    if(exposeSignalsEnabled()){
-      startGenerate(false);
-      return;
-    }
-    // show subscription modal
-    subModal.style.display = 'flex';
-    subModal.setAttribute('aria-hidden','false');
-  });
-
-  // core generation sequence: run ring progress for ~1.5s then show replica
-  function startGenerate(adminMode){
-    generateBtn.disabled = true;
-    generateBtn.textContent = 'Generating...';
-    // simulate progressive ring animation (0 -> confidence)
-    const runSeed = rawPair + '|' + Date.now();
-    const data = makeIndicators(runSeed);
-    // animate ring from current to target over short duration
-    let cur = 10;
-    const step = Math.max(8, Math.round(data.confidence/12));
-    const t = setInterval(()=>{
-      cur = Math.min(data.confidence, cur + step);
-      setRingPercent(cur);
-      if(cur >= data.confidence){
-        clearInterval(t);
-        // short delay to mimic processing
-        setTimeout(()=>{
-          // morph to replica UI
-          morphToReplica(decideSignalFromIndicators(data.indicators), data.confidence, data);
-          generateBtn.textContent = '⚡ Generate New Signal';
-          generateBtn.disabled = false;
-        }, 420);
-      }
-    }, 90);
-  }
-
-  // back button
-  backBtn.addEventListener('click', ()=> {
-    // go to dashboard if exists, else history
-    fetch('dashboard.html', { method:'HEAD' }).then(r=>{
-      if(r.ok) window.location.href = 'dashboard.html';
-      else history.back();
-    }).catch(()=> history.back());
-  });
-
-  // modal handlers
-  iSubBtn.addEventListener('click', ()=>{
-    try{ localStorage.setItem('tradealgo_subscribed','pending'); }catch(e){}
-    modalActions.style.display = 'none';
-    pendingArea.style.display = 'block';
-    waitingBtn.classList.add('disabled');
-  });
-  cancelPending.addEventListener('click', ()=>{
-    try{ localStorage.removeItem('tradealgo_subscribed'); }catch(e){}
-    pendingArea.style.display = 'none';
-    modalActions.style.display = 'flex';
-    subModal.style.display = 'none';
-    subModal.setAttribute('aria-hidden','true');
-  });
-  subModal.addEventListener('click', (e)=>{ if(e.target === subModal){ subModal.style.display = 'none'; subModal.setAttribute('aria-hidden','true'); } });
-
-  // expose toggle
-  if(exposeSwitch){
-    exposeSwitch.addEventListener('click', ()=>{
-      if(!isAdmin()) return;
-      setExposeSignals(!exposeSignalsEnabled());
-    });
-  }
-
-  // ensure admin panel shows if admin early
-  if(isAdmin()){ adminPanel.style.display = 'block'; renderExposeSwitch(); } else { adminPanel.style.display = 'none'; }
-
-  // poll for verification
-  let pollTimer = setInterval(()=>{
-    if(isVerified()){
-      waitingBtn.classList.remove('disabled');
-      waitingBtn.textContent = 'Verified — Ready';
-      if(subModal.style.display === 'flex'){ setTimeout(()=>{ subModal.style.display='none'; subModal.setAttribute('aria-hidden','true'); }, 700); }
-    }
-  }, 1200);
-  window.addEventListener('beforeunload', ()=> clearInterval(pollTimer) );
-
-})();
 </script>
+
 </body>
 </html>
