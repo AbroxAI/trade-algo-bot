@@ -8,14 +8,13 @@
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{
-    font-family: -apple-system, "SF Pro Text", Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    font-family: -apple-system, "Inter", "Segoe UI", Roboto, Arial, sans-serif;
     background: linear-gradient(180deg,#060718 0%, #040417 45%, #02030a 100%);
     color:#e6eef8;
     min-height:100vh;
     display:flex;align-items:center;justify-content:center;padding:12px;
   }
   .app{ width:100%; max-width:460px; background: linear-gradient(180deg, rgba(6,12,28,0.98), rgba(9,10,20,0.99)); border-radius:18px; box-shadow:0 30px 60px rgba(2,3,10,0.7); padding:18px; border:1px solid rgba(255,255,255,0.02); position:relative; }
-
   .heading { text-align:center; font-weight:800; font-size:16px; margin-bottom:8px; color:#fff;}
   .subtext{ text-align:center;color:rgba(230,238,248,0.62); font-size:12px; margin-bottom:12px; }
 
@@ -30,7 +29,10 @@
   .ring { width:132px;height:132px;border-radius:50%;margin:6px auto 8px;display:flex;align-items:center;justify-content:center; position:relative; }
   .ring .percent{ font-weight:800; font-size:20px; color:#b06bff; z-index:3; text-shadow:0 2px 8px rgba(176,107,255,0.15) }
   .ring svg{ position:absolute; left:0; top:0; transform:rotate(-90deg); }
+  .ring .bg-rot { transform-origin:50% 50%; animation: bgspin 7s linear infinite; opacity:0.06 }
+  @keyframes bgspin { to { transform: rotate(360deg); } }
 
+  /* indicator chips */
   .indicators{ display:flex; gap:8px; justify-content:center; margin-top:10px; margin-bottom:14px; flex-wrap:wrap }
   .ind-chip{ padding:8px 12px; border-radius:999px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.03); color:#fff; font-weight:700; font-size:12px; cursor:pointer; box-shadow: 0 8px 18px rgba(2,4,10,0.35); }
   .ind-chip.selected { background: linear-gradient(90deg,#17182b,#121224); color:#fff; box-shadow: 0 10px 28px rgba(60,20,140,0.18); }
@@ -39,6 +41,90 @@
   .btn-ghost{ width:100%; padding:12px; border-radius:12px; border:1px solid #1a1f35; font-weight:700; font-size:14px; color:#7a86a8; background:transparent; cursor:pointer; }
 
   .powered{ text-align:center; font-size:11px; color:#5b6280; margin-top:10px; }
+
+  /* arrow overlay (admin-only) */
+  .arrow-overlay {
+    position:absolute;
+    left:50%;
+    top:172px;
+    transform:translateX(-50%);
+    width:220px;
+    height:120px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+    opacity:0;
+    transition: opacity 260ms ease, transform 480ms cubic-bezier(.2,.9,.36,1);
+    z-index:6;
+  }
+  .arrow-overlay.show { opacity:1; transform:translateX(-50%) translateY(-8px); }
+
+  .signal-label {
+    margin-top:8px;
+    font-weight:900;
+    font-size:14px;
+    padding:6px 12px;
+    border-radius:999px;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    box-shadow: 0 8px 36px rgba(0,0,0,0.45);
+    opacity:0;
+    transform:translateY(6px);
+    transition: opacity 260ms ease, transform 360ms cubic-bezier(.2,.9,.36,1);
+    z-index:7;
+    pointer-events:none;
+  }
+  .signal-label.show { opacity:1; transform:translateY(0); }
+
+  .signal-up { background: linear-gradient(90deg,#0f7f4a,#34d399); color: #032614; text-shadow: 0 2px 8px rgba(52,211,153,0.12);}
+  .signal-down { background: linear-gradient(90deg,#ff6b7a,#ff4d6d); color: #3a0610; text-shadow: 0 2px 8px rgba(255,77,109,0.12); }
+
+  .glow-halo {
+    position:absolute;
+    inset:auto;
+    width:220px;
+    height:120px;
+    left:50%;
+    top:168px;
+    transform:translateX(-50%) scale(0.9);
+    border-radius:20px;
+    pointer-events:none;
+    z-index:4;
+    opacity:0;
+    mix-blend-mode:screen;
+  }
+  .glow-halo.up { background: radial-gradient(closest-side, rgba(52,211,153,0.14), rgba(52,211,153,0.03) 40%, transparent 55%); animation: haloUp 1500ms ease-in-out 1; }
+  .glow-halo.down { background: radial-gradient(closest-side, rgba(255,77,109,0.14), rgba(255,77,109,0.03) 40%, transparent 55%); animation: haloDown 1500ms ease-in-out 1; }
+  .glow-halo.show { opacity:1; }
+  @keyframes haloUp {0%{transform:translateX(-50%) scale(0.9); opacity:0}20%{opacity:0.9; transform:translateX(-50%) scale(1.06)}100%{opacity:0.12; transform:translateX(-50%) scale(1.12)}}
+  @keyframes haloDown {0%{transform:translateX(-50%) scale(0.9); opacity:0}20%{opacity:0.9; transform:translateX(-50%) scale(1.06)}100%{opacity:0.12; transform:translateX(-50%) scale(1.12)}}
+
+  /* admin panel */
+  .admin-panel{
+    margin-top:14px;
+    background: linear-gradient(180deg,#071028,#061022);
+    border-radius:12px;
+    padding:12px;
+    text-align:left;
+    font-size:13px;
+    color:#c8d2e6;
+    border:1px solid rgba(255,255,255,0.02);
+    box-shadow: 0 8px 30px rgba(2,3,12,0.6);
+  }
+  .admin-panel h4 { margin:0 0 8px 0; color:#f3f6fb; font-size:14px; font-weight:800; }
+  .admin-row { display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,0.02); }
+  .admin-row:last-child { border-bottom:0 }
+  .admin-key { color:#9aa4bd; font-weight:700; }
+  .admin-val { color:#fff; font-weight:800; }
+
+  /* admin toggle */
+  .admin-controls{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:10px; }
+  .toggle { display:inline-flex; align-items:center; gap:8px; }
+  .switch { width:46px; height:26px; border-radius:999px; background:#10121b; position:relative; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
+  .switch .knob { position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:999px; background:#e6eef8; transition: left 180ms; }
+  .switch.on { background: linear-gradient(90deg,#34d399,#0f7f4a); }
+  .switch.on .knob{ left:23px; background:#04241a; }
 
   /* modal */
   .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter: blur(4px); justify-content:center; align-items:center; z-index:9999; }
@@ -49,14 +135,13 @@
   .modal .actions a, .modal .actions button{ flex:1; padding:12px 10px; border-radius:12px; text-decoration:none; border:none; font-weight:800; cursor:pointer; }
   .modal .actions .tg{ background:linear-gradient(90deg,#5f2bff,#9a4dff); color:#fff; }
   .modal .actions .check{ background:#0a0f15; color:#9ff0c7; border:1px solid rgba(255,255,255,0.03); }
-
   .disabled { opacity:0.55; pointer-events:none; }
 
   @media (min-width:520px){ .app{ max-width:520px } }
 </style>
 </head>
 <body>
-  <div class="app" role="application" aria-label="Trading dashboard">
+  <div class="app" role="application" aria-label="Trading signal app">
     <div class="heading">Advanced Trading Signals</div>
     <div class="subtext">Pairs · Time · Signal</div>
 
@@ -73,7 +158,7 @@
       <!-- ring -->
       <div class="ring" role="img" aria-label="confidence ring">
         <svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">
-          <circle cx="66" cy="66" r="56" stroke="#22263b" stroke-width="10" fill="none"></circle>
+          <circle cx="66" cy="66" r="56" class="bg-rot" stroke="#111429" stroke-width="10" fill="none"></circle>
           <circle id="progressCircle" cx="66" cy="66" r="56" stroke="#b06bff" stroke-width="10" stroke-linecap="round" fill="none"
             stroke-dasharray="351.858" stroke-dashoffset="351.858"></circle>
         </svg>
@@ -88,18 +173,63 @@
       </div>
 
       <button class="btn-primary" id="generateBtn">⚡ Generate New Signal</button>
-      <button class="btn-ghost" id="openSignal">Open Signal Page</button>
+      <button class="btn-ghost" id="openSignalBtn">Open Signal Viewer</button>
 
       <div class="powered">Powered by Advanced AI</div>
-    </div>
-  </div>
+
+      <!-- glow halo -->
+      <div class="glow-halo" id="glowHalo" aria-hidden="true"></div>
+
+      <!-- arrow overlay shown only for admin -->
+      <div class="arrow-overlay" id="arrowOverlay" aria-hidden="true">
+        <div class="arrow-up" id="arrowUp" style="display:none">
+          <svg viewBox="0 0 140 90" width="160" height="82" xmlns="http://www.w3.org/2000/svg" class="arrow-svg">
+            <path id="arrowPathUp" d="M12 60 L55 18 L85 46 L128 8" stroke="#34D399" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            <path d="M124 12 L132 18 L118 20" stroke="#34D399" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          </svg>
+        </div>
+        <div class="arrow-down" id="arrowDown" style="display:none">
+          <svg viewBox="0 0 140 90" width="160" height="82" xmlns="http://www.w3.org/2000/svg" class="arrow-svg">
+            <path id="arrowPathDown" d="M12 18 L55 60 L85 30 L128 72" stroke="#ff5b74" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            <path d="M124 68 L132 62 L118 60" stroke="#ff5b74" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- signal label -->
+      <div id="signalLabel" class="signal-label" aria-hidden="true"></div>
+
+      <!-- admin debug hidden by default -->
+      <div id="adminPanel" class="admin-panel" style="display:none" aria-hidden="true">
+        <h4>ADMIN DEBUG</h4>
+        <div class="admin-row"><div class="admin-key">Final Signal</div><div id="admSignal" class="admin-val">—</div></div>
+        <div class="admin-row"><div class="admin-key">Confidence</div><div id="admConfidence" class="admin-val">—</div></div>
+        <div class="admin-row"><div class="admin-key">Strength</div><div id="admStrength" class="admin-val">—</div></div>
+
+        <div style="margin-top:8px;font-weight:800;color:#9aa4bd">Indicator Breakdown</div>
+        <div id="admIndicators" style="margin-top:8px"></div>
+
+        <div class="admin-controls">
+          <div style="font-size:13px;color:#9aa4bd">Expose signals to users</div>
+          <div class="toggle" id="exposeToggleWrap" title="Toggle whether non-admin users can get live signals">
+            <div id="exposeSwitch" class="switch" role="button" aria-pressed="false"><div class="knob"></div></div>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;font-size:12px;color:#9aa4bd">
+          To open admin directly: append <code>?admin=1&admin_key=CipherDev12$</code> to the page URL.
+        </div>
+      </div>
+
+    </div> <!-- card -->
+  </div> <!-- app -->
 
   <!-- subscription modal -->
   <div class="modal" id="subModal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="box" id="modalBox">
       <h3 id="modalTitle">Subscription Required</h3>
       <p id="modalText">
-        To generate live AI trading signals you must activate a subscription through our official Telegram bot.
+        To generate live AI trading signals you must activate a subscription through our official Telegram bot. Subscribing gives you verified access to real-time signals and push notifications.
       </p>
       <div class="actions" id="modalActions">
         <a class="tg" id="tgLink" href="https://t.me/Trade_Algo_Robot?start=tradealgo_sub" target="_blank" rel="noopener noreferrer">Open Telegram Bot</a>
@@ -119,8 +249,10 @@
 
 <script>
 (function(){
-  // read querystrings
+  // querystring helper
   const qs = n => new URLSearchParams(location.search).get(n);
+
+  // incoming params
   const rawPair = qs('pair') || 'EURUSD';
   const tf = qs('tf') || '5s';
   const flag1 = qs('flag1') || '';
@@ -132,7 +264,7 @@
   const flag1Img = document.getElementById('flag1Img');
   const flag2Img = document.getElementById('flag2Img');
   const generateBtn = document.getElementById('generateBtn');
-  const openSignalBtn = document.getElementById('openSignal');
+  const openSignalBtn = document.getElementById('openSignalBtn');
   const subModal = document.getElementById('subModal');
   const iSubBtn = document.getElementById('iSubscribedBtn');
   const modalActions = document.getElementById('modalActions');
@@ -142,13 +274,26 @@
   const progressCircle = document.getElementById('progressCircle');
   const ringPercent = document.getElementById('ringPercent');
   const indicatorsList = document.getElementById('indicatorsList');
+  const arrowOverlay = document.getElementById('arrowOverlay');
+  const arrowUp = document.getElementById('arrowUp');
+  const arrowDown = document.getElementById('arrowDown');
+  const glowHalo = document.getElementById('glowHalo');
+  const signalLabel = document.getElementById('signalLabel');
 
-  // admin config
+  const adminPanel = document.getElementById('adminPanel');
+  const admSignal = document.getElementById('admSignal');
+  const admConfidence = document.getElementById('admConfidence');
+  const admStrength = document.getElementById('admStrength');
+  const admIndicators = document.getElementById('admIndicators');
+  const exposeSwitch = document.getElementById('exposeSwitch');
+
+  // admin key (your key)
   const ADMIN_KEY_EXPECTED = 'CipherDev12$';
 
   function flagUrl(code,size){ if(!code) return ''; return `https://flagcdn.com/w${size}/${code}.png`; }
   function formatPair(p){ return (p && p.length===6) ? p.slice(0,3) + ' / ' + p.slice(3) : p; }
 
+  // admin detection
   function isAdmin(){
     try {
       if(qs('admin') === '1' && qs('admin_key') === ADMIN_KEY_EXPECTED){
@@ -159,11 +304,12 @@
     } catch(e){ return false; }
   }
 
-  function exposeSignalsEnabled(){
-    return localStorage.getItem('tradealgo_expose') === '1';
-  }
+  function exposeSignalsEnabled(){ return localStorage.getItem('tradealgo_expose') === '1'; }
+  function setExposeSignals(v){ try{ localStorage.setItem('tradealgo_expose', v ? '1' : '0'); }catch(e){}; renderExposeSwitch(); }
 
-  // seeded PRNG
+  function isVerified(){ return localStorage.getItem('tradealgo_verified') === '1'; }
+
+  // seeded PRNG for repeatable indicators
   function seeded(seedString){
     let seed = 0;
     for(let i=0;i<seedString.length;i++) seed = (seed*31 + seedString.charCodeAt(i)) % 1000000;
@@ -174,6 +320,7 @@
     };
   }
 
+  // generate indicators & confidence
   function makeIndicators(seedStr){
     const r = seeded(seedStr);
     const indicators = {
@@ -199,6 +346,7 @@
     return {indicators,score:Number((score*10).toFixed(2)),confidence};
   }
 
+  // render indicator chips
   function renderIndicatorChips(ind){
     indicatorsList.innerHTML = '';
     const mapping = [
@@ -226,51 +374,143 @@
   function setRingPercent(pct){
     const radius = 56;
     const circumference = 2 * Math.PI * radius;
-    progressCircle.setAttribute('stroke-dasharray', circumference.toFixed(3));
     const offset = Math.round(circumference * (1 - pct/100));
+    progressCircle.setAttribute('stroke-dasharray', circumference.toFixed(3));
     progressCircle.style.transition = 'stroke-dashoffset 800ms cubic-bezier(.2,.9,.36,1)';
     progressCircle.style.strokeDashoffset = offset;
     ringPercent.textContent = pct + '%';
   }
 
-  // init UI
+  // decide up/down
+  function decideSignalFromIndicators(ind){
+    const scoreComposite = (ind.MACD * 1.3) + (ind.OBV_trend * 1.2) + (ind.EMA_diff * 1.0) + ((ind.RSI - 50) / 30);
+    return scoreComposite >= 0 ? 'UP' : 'DOWN';
+  }
+
+  // show arrow overlay
+  function showArrow(direction, confidence){
+    arrowUp.style.display = 'none';
+    arrowDown.style.display = 'none';
+    glowHalo.className = 'glow-halo';
+    signalLabel.className = 'signal-label';
+    signalLabel.textContent = '';
+
+    if(direction === 'UP'){
+      arrowUp.style.display = 'block';
+      glowHalo.classList.add('up','show');
+      signalLabel.classList.add('signal-up','show');
+      signalLabel.textContent = `Your signal is UP — ${confidence}%`;
+    } else {
+      arrowDown.style.display = 'block';
+      glowHalo.classList.add('down','show');
+      signalLabel.classList.add('signal-down','show');
+      signalLabel.textContent = `Your signal is DOWN — ${confidence}%`;
+    }
+    arrowOverlay.classList.add('show');
+    setTimeout(()=>{
+      arrowOverlay.classList.remove('show');
+      glowHalo.className = 'glow-halo';
+      signalLabel.classList.remove('show');
+    }, 5000);
+  }
+
+  // render admin debug
+  function renderAdminDebug(out){
+    if(!isAdmin()) return;
+    adminPanel.style.display = 'block';
+    admSignal.textContent = out.finalSignal || '—';
+    admConfidence.textContent = (out.confidence? out.confidence + '%' : '—');
+    admStrength.textContent = (out.strength? out.strength + ' / 10' : '—');
+    admIndicators.innerHTML = '';
+    for(const k in (out.indicators || {})){
+      const row = document.createElement('div');
+      row.style.display='flex'; row.style.justifyContent='space-between'; row.style.padding='6px 0';
+      row.innerHTML = `<div style="color:#9aa4bd;font-weight:700">${k}</div><div style="font-weight:800">${out.indicators[k]}</div>`;
+      admIndicators.appendChild(row);
+    }
+  }
+
+  // expose switch visuals
+  function renderExposeSwitch(){
+    if(!exposeSwitch) return;
+    const on = exposeSignalsEnabled();
+    if(on){
+      exposeSwitch.classList.add('on');
+      exposeSwitch.setAttribute('aria-pressed','true');
+    } else {
+      exposeSwitch.classList.remove('on');
+      exposeSwitch.setAttribute('aria-pressed','false');
+    }
+  }
+
+  // apply header info
   pairTitleEl.textContent = `${formatPair(rawPair)} (OTC)`;
   pairMetaEl.textContent = `Live Signal · ${tf} Frame`;
   if(flag1){ flag1Img.src = flagUrl(flag1,40); flag1Img.alt = flag1; document.getElementById('flag1Wrap').style.display='inline-block'; } else document.getElementById('flag1Wrap').style.display='none';
   if(flag2){ flag2Img.src = flagUrl(flag2,40); flag2Img.alt = flag2; document.getElementById('flag2Wrap').style.display='inline-block'; } else document.getElementById('flag2Wrap').style.display='none';
 
-  const initial = makeIndicators(rawPair + '::' + (new Date()).toISOString().slice(0,16));
+  // initial state
+  const seedBase = rawPair + '::' + (new Date()).toISOString().slice(0,16);
+  const initial = makeIndicators(seedBase);
   renderIndicatorChips(initial.indicators);
   setTimeout(()=> setRingPercent(initial.confidence), 120);
 
-  // generate behavior (dashboard)
+  // admin panel visibility
+  if(isAdmin()){
+    renderAdminDebug({ finalSignal:'—', confidence: initial.confidence, strength: initial.score, indicators: initial.indicators });
+    renderExposeSwitch();
+  } else {
+    adminPanel.style.display = 'none';
+  }
+
+  // handle generate
   generateBtn.addEventListener('click', ()=>{
     if(isAdmin()){
-      // admin can generate directly (admin UI is on signal page too)
-      window.location.href = 'signal.html?admin=1&admin_key=' + encodeURIComponent('CipherDev12$') + '&pair=' + encodeURIComponent(rawPair) + '&tf=' + encodeURIComponent(tf);
-      return;
-    }
-    // non-admin: if expose flag set, allow generation (simulate), else show subscription
-    if(localStorage.getItem('tradealgo_expose') === '1'){
       generateBtn.disabled = true;
       generateBtn.textContent = 'Generating...';
       setTimeout(()=>{
         const nowData = makeIndicators(rawPair + '|' + Date.now());
+        const finalSignal = decideSignalFromIndicators(nowData.indicators);
         setRingPercent(nowData.confidence);
         renderIndicatorChips(nowData.indicators);
+        showArrow(finalSignal, nowData.confidence);
+        renderAdminDebug({ finalSignal, confidence: nowData.confidence, strength: nowData.score, indicators: nowData.indicators });
+        // persist last signal for signal.html viewer
+        try { localStorage.setItem('tradealgo_last_signal', JSON.stringify({pair:rawPair,tf,signal:finalSignal,confidence:nowData.confidence,indicators:nowData.indicators,ts:Date.now()})); }catch(e){}
+        generateBtn.textContent = '⚡ Generate New Signal';
+        generateBtn.disabled = false;
+      }, 850);
+      return;
+    }
+
+    // non-admin path
+    if(exposeSignalsEnabled()){
+      generateBtn.disabled = true;
+      generateBtn.textContent = 'Generating...';
+      setTimeout(()=>{
+        const nowData = makeIndicators(rawPair + '|' + Date.now());
+        const finalSignal = decideSignalFromIndicators(nowData.indicators);
+        setRingPercent(nowData.confidence);
+        renderIndicatorChips(nowData.indicators);
+        // brief visual for non-admin (no admin panel)
+        showArrow(finalSignal, nowData.confidence);
+        try { localStorage.setItem('tradealgo_last_signal', JSON.stringify({pair:rawPair,tf,signal:finalSignal,confidence:nowData.confidence,indicators:nowData.indicators,ts:Date.now()})); }catch(e){}
         generateBtn.textContent = '⚡ Generate New Signal';
         generateBtn.disabled = false;
       }, 900);
       return;
     }
+
+    // otherwise show subscription modal
     subModal.style.display = 'flex';
     subModal.setAttribute('aria-hidden','false');
   });
 
+  // open signal viewer
   openSignalBtn.addEventListener('click', ()=>{
-    // open signal page (will respect admin query if present)
-    const adminQ = isAdmin() ? ('?admin=1&admin_key=' + encodeURIComponent('CipherDev12$') + '&pair=' + encodeURIComponent(rawPair) + '&tf=' + encodeURIComponent(tf)) : ('?pair=' + encodeURIComponent(rawPair) + '&tf=' + encodeURIComponent(tf));
-    window.location.href = 'signal.html' + adminQ;
+    // opens signal.html; add admin params if present
+    const adminQS = isAdmin() ? '?admin=1&admin_key=' + encodeURIComponent(ADMIN_KEY_EXPECTED) : '';
+    window.open('signal.html' + adminQS, '_blank');
   });
 
   // modal handlers
@@ -289,6 +529,34 @@
   });
   subModal.addEventListener('click', (e)=>{ if(e.target === subModal){ subModal.style.display = 'none'; subModal.setAttribute('aria-hidden','true'); } });
 
+  // expose toggle click (admin only)
+  if(exposeSwitch){
+    exposeSwitch.addEventListener('click', ()=>{
+      if(!isAdmin()) return;
+      const newVal = !exposeSignalsEnabled();
+      setExposeSignals(newVal);
+    });
+  }
+
+  // ensure admin panel shows after admin param
+  if(isAdmin()){
+    adminPanel.style.display = 'block';
+    renderExposeSwitch();
+  } else {
+    adminPanel.style.display = 'none';
+  }
+
+  // poll for verification
+  let pollTimer = setInterval(()=>{
+    if(isVerified()){
+      waitingBtn.classList.remove('disabled');
+      waitingBtn.textContent = 'Verified — Ready';
+      if(subModal.style.display === 'flex'){
+        setTimeout(()=>{ subModal.style.display='none'; subModal.setAttribute('aria-hidden','true'); }, 700);
+      }
+    }
+  }, 1200);
+  window.addEventListener('beforeunload', ()=> clearInterval(pollTimer) );
 })();
 </script>
 </body>
